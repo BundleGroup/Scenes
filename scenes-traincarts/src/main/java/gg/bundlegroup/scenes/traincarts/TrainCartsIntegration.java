@@ -36,7 +36,7 @@ public class TrainCartsIntegration implements Integration, Listener {
 
     @Override
     public void enable() {
-        controller = SceneManager.get().createController(plugin);
+        controller = SceneManager.get().createController(plugin, "TrainCarts");
         signActions.add(new SignActionShowScene(controller));
         signActions.add(new SignActionHideScene(controller));
         for (SignAction signAction : signActions) {

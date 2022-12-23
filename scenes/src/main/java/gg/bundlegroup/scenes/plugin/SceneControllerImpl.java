@@ -4,6 +4,7 @@ import gg.bundlegroup.scenes.api.SceneController;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -14,15 +15,22 @@ import java.util.Set;
 public class SceneControllerImpl implements SceneController {
     private final SceneManagerImpl manager;
     private final Plugin plugin;
+    private final @Nullable String name;
     private final Map<Player, Set<String>> entries = new HashMap<>();
     private boolean removed;
 
-    public SceneControllerImpl(SceneManagerImpl manager, Plugin plugin) {
+    public SceneControllerImpl(SceneManagerImpl manager, Plugin plugin, @Nullable String name) {
         this.manager = manager;
         this.plugin = plugin;
+        this.name = name;
     }
 
-    public Plugin getPlugin() {
+    @Override
+    public String name() {
+        return name;
+    }
+
+    public Plugin plugin() {
         return plugin;
     }
 

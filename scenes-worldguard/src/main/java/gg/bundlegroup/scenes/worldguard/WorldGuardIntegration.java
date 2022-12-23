@@ -54,7 +54,7 @@ public class WorldGuardIntegration implements Integration {
     @Override
     public void enable() {
         SessionManager sessionManager = WorldGuard.getInstance().getPlatform().getSessionManager();
-        controller = SceneManager.get().createController(plugin);
+        controller = SceneManager.get().createController(plugin, "WorldGuard");
         handlerFactory = new SceneHandlerFactory(sceneFlag, controller);
         sessionManager.registerHandler(handlerFactory, null);
     }

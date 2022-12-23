@@ -15,8 +15,13 @@ import cloud.commandframework.minecraft.extras.MinecraftExceptionHandler;
 import cloud.commandframework.minecraft.extras.MinecraftHelp;
 import cloud.commandframework.paper.PaperCommandManager;
 import gg.bundlegroup.scenes.api.SceneManagerProvider;
+import gg.bundlegroup.scenes.api.event.SceneClearEvent;
 import gg.bundlegroup.scenes.api.event.SceneCompleteEvent;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -36,6 +41,7 @@ public class ScenesPlugin extends JavaPlugin {
     private BukkitAudiences audiences;
     private PaperCommandManager<CommandSender> commandManager;
     private MinecraftHelp<CommandSender> minecraftHelp;
+    private SceneManagerImpl sceneManager;
     private SceneControllerImpl manualController;
 
     @Override
@@ -89,11 +95,11 @@ public class ScenesPlugin extends JavaPlugin {
         );
         parser.parse(this);
 
-        SceneManagerImpl sceneManager = new SceneManagerImpl();
+        sceneManager = new SceneManagerImpl();
         getServer().getPluginManager().registerEvents(sceneManager, this);
         SceneManagerProvider.set(sceneManager);
 
-        manualController = sceneManager.createController(this);
+        manualController = sceneManager.createController(this, "manual visibility");
 
         for (Map.Entry<String, Integration> entry : integrations.entrySet()) {
             String name = entry.getKey();
@@ -127,12 +133,49 @@ public class ScenesPlugin extends JavaPlugin {
     @CommandPermission("scenes.show")
     public void show(Player sender, @Argument(value = "scene", suggestions = "scene") String scene) {
         manualController.show(sender, scene);
+        TextComponent.Builder message = Component.text()
+                .content("Manually showing scene ")
+                .append(Component.text(scene, NamedTextColor.YELLOW))
+                .color(NamedTextColor.GREEN);
+        if (sender.hasPermission("scenes.hide")) {
+            message.append(Component.text(" (click to hide)"))
+                    .clickEvent(ClickEvent.runCommand("/scenes hide " + scene));
+        }
+        audiences.sender(sender).sendMessage(message);
     }
 
     @CommandMethod("scenes hide <scene>")
     @CommandPermission("scenes.hide")
     public void hide(Player sender, @Argument(value = "scene", suggestions = "manual_scene") String scene) {
         manualController.hide(sender, scene);
+        audiences.sender(sender).sendMessage(Component.text()
+                .content("No longer manually showing scene ")
+                .append(Component.text(scene, NamedTextColor.YELLOW))
+                .color(NamedTextColor.GREEN));
+
+        Set<SceneControllerImpl> controllers = sceneManager.getVisibilityReason(sender, scene);
+        for (SceneControllerImpl controller : controllers) {
+            String name = controller.name();
+            TextComponent.Builder message = Component.text()
+                    .content("Plugin ")
+                    .append(Component.text(controller.plugin().getName(), NamedTextColor.YELLOW))
+                    .append(Component.text(" is still showing it"))
+                    .color(NamedTextColor.GRAY);
+            if (name != null) {
+                message.append(Component.text(": " + name));
+            }
+            audiences.sender(sender).sendMessage(message);
+        }
+    }
+
+    @CommandMethod("scenes clear <scene>")
+    @CommandPermission("scenes.clear")
+    public void clear(CommandSender sender, @Argument(value = "scene", suggestions = "scene") String scene) {
+        Bukkit.getPluginManager().callEvent(new SceneClearEvent(scene));
+        audiences.sender(sender).sendMessage(Component.text()
+                .content("Removed everything from scene ")
+                .append(Component.text(scene, NamedTextColor.YELLOW))
+                .color(NamedTextColor.GREEN));
     }
 
     @Suggestions("scene")

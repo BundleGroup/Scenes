@@ -11,6 +11,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -22,14 +23,14 @@ public class SceneManagerImpl implements SceneManager, Listener {
     private final Map<Player, Map<String, Set<SceneControllerImpl>>> playerScenes = new HashMap<>();
 
     @Override
-    public @NotNull SceneControllerImpl createController(@NotNull Plugin plugin) {
-        SceneControllerImpl controller = new SceneControllerImpl(this, plugin);
+    public @NotNull SceneControllerImpl createController(@NotNull Plugin plugin, @Nullable String name) {
+        SceneControllerImpl controller = new SceneControllerImpl(this, plugin, name);
         sceneControllers.computeIfAbsent(plugin, p -> new HashSet<>()).add(controller);
         return controller;
     }
 
     public void unregisterController(@NotNull SceneControllerImpl controller) {
-        Plugin plugin = controller.getPlugin();
+        Plugin plugin = controller.plugin();
         Set<SceneControllerImpl> controllers = sceneControllers.get(plugin);
         if (controllers != null) {
             if (controllers.remove(controller)) {
@@ -47,6 +48,18 @@ public class SceneManagerImpl implements SceneManager, Listener {
             return false;
         }
         return scenes.containsKey(scene);
+    }
+
+    public Set<SceneControllerImpl> getVisibilityReason(@NotNull Player player, @NotNull String scene) {
+        Map<String, Set<SceneControllerImpl>> scenes = playerScenes.get(player);
+        if (scenes == null) {
+            return Set.of();
+        }
+        Set<SceneControllerImpl> controllers = scenes.get(scene);
+        if (controllers == null) {
+            return Set.of();
+        }
+        return Set.copyOf(controllers);
     }
 
     public void show(SceneControllerImpl controller, Player player, String scene) {

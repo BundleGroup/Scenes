@@ -5,6 +5,7 @@ import cloud.commandframework.annotations.CommandMethod;
 import cloud.commandframework.annotations.CommandPermission;
 import cloud.commandframework.bukkit.arguments.selector.MultipleEntitySelector;
 import gg.bundlegroup.scenes.api.SceneManager;
+import gg.bundlegroup.scenes.api.event.SceneClearEvent;
 import gg.bundlegroup.scenes.api.event.SceneCompleteEvent;
 import gg.bundlegroup.scenes.api.event.SceneHideEvent;
 import gg.bundlegroup.scenes.api.event.SceneShowEvent;
@@ -105,7 +106,13 @@ public class EntityIntegration implements Integration, Listener {
             return;
         }
         sceneEntities.computeIfAbsent(scene, s -> Collections.newSetFromMap(new WeakHashMap<>())).add(entity);
-        updateVisibility(entity, scene);
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            if (SceneManager.get().isVisible(player, scene)) {
+                player.showEntity(plugin, entity);
+            } else {
+                player.hideEntity(plugin, entity);
+            }
+        }
     }
 
     private void removeEntity(Entity entity) {
@@ -116,16 +123,8 @@ public class EntityIntegration implements Integration, Listener {
             if (entities.isEmpty()) {
                 sceneEntities.remove(scene);
             }
-            updateVisibility(entity, scene);
-        }
-    }
-
-    private void updateVisibility(Entity entity, String scene) {
-        for (Player player : Bukkit.getOnlinePlayers()) {
-            if (SceneManager.get().isVisible(player, scene)) {
+            for (Player player : Bukkit.getOnlinePlayers()) {
                 player.showEntity(plugin, entity);
-            } else {
-                player.hideEntity(plugin, entity);
             }
         }
     }
@@ -196,6 +195,20 @@ public class EntityIntegration implements Integration, Listener {
             list = List.copyOf(sceneEntities.keySet());
         }
         event.addScenes(list);
+    }
+
+    @EventHandler
+    public void onClear(SceneClearEvent event) {
+        Set<Entity> entities = sceneEntities.remove(event.getScene());
+        for (Entity entity : entities) {
+            entityScenes.remove(entity);
+            entity.getPersistentDataContainer().remove(key);
+        }
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            for (Entity entity : entities) {
+                player.showEntity(plugin, entity);
+            }
+        }
     }
 
     @CommandMethod("scenes assign <entity> [scene]")

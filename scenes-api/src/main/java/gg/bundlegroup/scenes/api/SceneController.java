@@ -8,6 +8,8 @@ import org.jetbrains.annotations.ApiStatus;
  */
 @ApiStatus.NonExtendable
 public interface SceneController {
+    String name();
+
     void show(Player player, String scene);
 
     void hide(Player player, String scene);
