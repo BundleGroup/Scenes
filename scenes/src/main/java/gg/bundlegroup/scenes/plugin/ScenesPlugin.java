@@ -22,20 +22,41 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.logging.Level;
 
 public class ScenesPlugin extends JavaPlugin {
-    private final List<Integration> integrations = new ArrayList<>();
+    private final Map<String, Integration> integrations = new HashMap<>();
     private BukkitAudiences audiences;
     private PaperCommandManager<CommandSender> commandManager;
     private MinecraftHelp<CommandSender> minecraftHelp;
     private SceneControllerImpl manualController;
+
+    @Override
+    public void onLoad() {
+        for (IntegrationProvider provider : ServiceLoader.load(IntegrationProvider.class, getClassLoader())) {
+            if (provider.available()) {
+                String name = provider.name();
+                getLogger().info("Loading " + name + " integration");
+                try {
+                    Integration integration = provider.create(this);
+                    integration.load();
+                    Integration old = integrations.putIfAbsent(name, integration);
+                    if (old != null) {
+                        throw new IllegalArgumentException("Duplicate integration name: " + name);
+                    }
+                } catch (Throwable t) {
+                    getLogger().log(Level.SEVERE, "Failed to load " + name + " integration", t);
+                }
+            }
+        }
+    }
 
     @Override
     public void onEnable() {
@@ -51,7 +72,7 @@ public class ScenesPlugin extends JavaPlugin {
             throw new RuntimeException(e);
         }
 
-        if (true || commandManager.hasCapability(CloudBukkitCapabilities.NATIVE_BRIGADIER)) {
+        if (commandManager.hasCapability(CloudBukkitCapabilities.NATIVE_BRIGADIER)) {
             commandManager.registerBrigadier();
         }
 
@@ -74,29 +95,29 @@ public class ScenesPlugin extends JavaPlugin {
 
         manualController = sceneManager.createController(this);
 
-        for (IntegrationProvider provider : ServiceLoader.load(IntegrationProvider.class, getClassLoader())) {
-            if (provider.available()) {
-                String name = provider.name();
-                getLogger().info("Enabling " + name + " integration");
-                try {
-                    Integration integration = provider.create(this);
-                    parser.parse(integration);
-                    getServer().getPluginManager().registerEvents(integration, this);
-                    integrations.add(integration);
-                } catch (Throwable t) {
-                    getLogger().log(Level.SEVERE, "Failed to enable " + name + " integration", t);
-                }
+        for (Map.Entry<String, Integration> entry : integrations.entrySet()) {
+            String name = entry.getKey();
+            Integration integration = entry.getValue();
+            getLogger().info("Enabling " + name + " integration");
+            try {
+                integration.enable();
+                parser.parse(integration);
+                getServer().getPluginManager().registerEvents(integration, this);
+            } catch (Throwable t) {
+                getLogger().log(Level.SEVERE, "Failed to enable " + name + " integration", t);
             }
         }
     }
 
     @Override
     public void onDisable() {
-        for (Integration integration : integrations) {
+        for (Map.Entry<String, Integration> entry : integrations.entrySet()) {
+            String name = entry.getKey();
+            Integration integration = entry.getValue();
             try {
-                integration.unregister();
+                integration.disable();
             } catch (Throwable t) {
-                getLogger().log(Level.SEVERE, "Failed to unregister integration", t);
+                getLogger().log(Level.SEVERE, "Failed to disable " + name + " integration", t);
             }
         }
         integrations.clear();

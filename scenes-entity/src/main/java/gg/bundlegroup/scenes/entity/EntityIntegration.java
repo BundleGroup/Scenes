@@ -14,6 +14,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
+import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -44,10 +45,18 @@ public class EntityIntegration implements Integration, Listener {
     private final Map<Entity, String> entityScenes = new WeakHashMap<>();
     private final Set<EntityType> deniedTypes = Set.of(EntityType.PLAYER);
 
-    @SuppressWarnings("unchecked")
     public EntityIntegration(ScenesPlugin plugin) {
         this.plugin = plugin;
         this.key = new NamespacedKey(plugin, "scene");
+    }
+
+    @Override
+    public void load() {
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public void enable() {
         try {
             plugin.getServer().getPluginManager().registerEvent(
                     (Class<? extends EntityEvent>) Class.forName("com.destroystokyo.paper.event.entity.EntityRemoveFromWorldEvent"),
@@ -65,10 +74,16 @@ public class EntityIntegration implements Integration, Listener {
             // Entities are only stored in weak collections and validity is checked before hiding
             // This should be enough to prevent memory leaks
         }
+
+        for (World world : Bukkit.getWorlds()) {
+            for (Entity entity : world.getEntities()) {
+                updateEntity(entity);
+            }
+        }
     }
 
     @Override
-    public void unregister() {
+    public void disable() {
         for (Player player : Bukkit.getOnlinePlayers()) {
             for (Entity entity : entityScenes.keySet()) {
                 player.showEntity(plugin, entity);

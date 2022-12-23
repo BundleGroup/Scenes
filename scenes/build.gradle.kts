@@ -9,7 +9,7 @@ bukkit {
     main = "gg.bundlegroup.scenes.plugin.ScenesPlugin"
     apiVersion = "1.19"
     author = "56738"
-    softDepend = listOf("Train_Carts")
+    softDepend = listOf("Train_Carts", "WorldGuard")
 }
 
 val cloudVersion = "1.8.0"
@@ -18,6 +18,7 @@ dependencies {
     api(project(":scenes-api"))
     runtimeOnly(project(":scenes-entity"))
     runtimeOnly(project(":scenes-traincarts"))
+    runtimeOnly(project(":scenes-worldguard"))
     api("net.kyori:adventure-platform-bukkit:4.2.0")
     api("cloud.commandframework:cloud-paper:$cloudVersion")
     api("cloud.commandframework:cloud-annotations:$cloudVersion")

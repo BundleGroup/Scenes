@@ -8,7 +8,6 @@ import gg.bundlegroup.scenes.plugin.Integration;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.permissions.Permission;
 import org.bukkit.plugin.Plugin;
@@ -17,17 +16,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TrainCartsIntegration implements Integration, Listener {
+    private final Plugin plugin;
     private final List<SignAction> signActions = new ArrayList<>();
-    private final SceneController controller;
+    private SceneController controller;
 
     public TrainCartsIntegration(Plugin plugin) {
-        controller = SceneManager.get().createController(plugin);
-        signActions.add(new SignActionShowScene(controller));
-        signActions.add(new SignActionHideScene(controller));
-        for (SignAction signAction : signActions) {
-            SignAction.register(signAction);
-        }
-        plugin.getServer().getPluginManager().registerEvents(this, plugin);
+        this.plugin = plugin;
+    }
+
+    @Override
+    public void load() {
         Bukkit.getPluginManager().addPermission(new Permission(
                 "scenes.traincarts.build.show",
                 "Allows building showscene signs"));
@@ -37,8 +35,17 @@ public class TrainCartsIntegration implements Integration, Listener {
     }
 
     @Override
-    public void unregister() {
-        HandlerList.unregisterAll(this);
+    public void enable() {
+        controller = SceneManager.get().createController(plugin);
+        signActions.add(new SignActionShowScene(controller));
+        signActions.add(new SignActionHideScene(controller));
+        for (SignAction signAction : signActions) {
+            SignAction.register(signAction);
+        }
+    }
+
+    @Override
+    public void disable() {
         for (SignAction signAction : signActions) {
             SignAction.unregister(signAction);
         }

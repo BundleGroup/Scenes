@@ -7,11 +7,6 @@ version = "1.0-SNAPSHOT"
 
 repositories {
     maven("https://repo.papermc.io/repository/maven-public/")
-    maven("https://ci.mg-dev.eu/plugin/repository/everything/") {
-        content {
-            includeGroupByRegex("com\\.bergerkiller\\..*")
-        }
-    }
 }
 
 dependencies {
