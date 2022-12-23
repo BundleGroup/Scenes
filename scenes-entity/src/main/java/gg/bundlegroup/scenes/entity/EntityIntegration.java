@@ -105,6 +105,13 @@ public class EntityIntegration implements Integration, Listener {
         if (scene.equals(old)) {
             return;
         }
+        if (old != null) {
+            Set<Entity> entities = sceneEntities.get(old);
+            entities.remove(entity);
+            if (entities.isEmpty()) {
+                sceneEntities.remove(old);
+            }
+        }
         sceneEntities.computeIfAbsent(scene, s -> Collections.newSetFromMap(new WeakHashMap<>())).add(entity);
         for (Player player : Bukkit.getOnlinePlayers()) {
             if (SceneManager.get().isVisible(player, scene)) {
@@ -200,6 +207,9 @@ public class EntityIntegration implements Integration, Listener {
     @EventHandler
     public void onClear(SceneClearEvent event) {
         Set<Entity> entities = sceneEntities.remove(event.getScene());
+        if (entities == null) {
+            return;
+        }
         for (Entity entity : entities) {
             entityScenes.remove(entity);
             entity.getPersistentDataContainer().remove(key);
