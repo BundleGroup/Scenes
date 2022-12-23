@@ -1,0 +1,151 @@
+package gg.bundlegroup.scenes.plugin;
+
+import cloud.commandframework.CommandHelpHandler;
+import cloud.commandframework.annotations.AnnotationParser;
+import cloud.commandframework.annotations.Argument;
+import cloud.commandframework.annotations.CommandMethod;
+import cloud.commandframework.annotations.CommandPermission;
+import cloud.commandframework.annotations.specifier.Greedy;
+import cloud.commandframework.annotations.suggestions.Suggestions;
+import cloud.commandframework.bukkit.CloudBukkitCapabilities;
+import cloud.commandframework.context.CommandContext;
+import cloud.commandframework.execution.CommandExecutionCoordinator;
+import cloud.commandframework.meta.CommandMeta;
+import cloud.commandframework.minecraft.extras.MinecraftExceptionHandler;
+import cloud.commandframework.minecraft.extras.MinecraftHelp;
+import cloud.commandframework.paper.PaperCommandManager;
+import gg.bundlegroup.scenes.api.SceneManagerProvider;
+import gg.bundlegroup.scenes.api.event.SceneCompleteEvent;
+import net.kyori.adventure.platform.bukkit.BukkitAudiences;
+import org.bukkit.Bukkit;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+import org.bukkit.plugin.java.JavaPlugin;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.ServiceLoader;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.logging.Level;
+
+public class ScenesPlugin extends JavaPlugin {
+    private final List<Integration> integrations = new ArrayList<>();
+    private BukkitAudiences audiences;
+    private PaperCommandManager<CommandSender> commandManager;
+    private MinecraftHelp<CommandSender> minecraftHelp;
+    private SceneControllerImpl manualController;
+
+    @Override
+    public void onEnable() {
+        audiences = BukkitAudiences.create(this);
+
+        try {
+            commandManager = new PaperCommandManager<>(
+                    this,
+                    CommandExecutionCoordinator.simpleCoordinator(),
+                    Function.identity(),
+                    Function.identity());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        if (true || commandManager.hasCapability(CloudBukkitCapabilities.NATIVE_BRIGADIER)) {
+            commandManager.registerBrigadier();
+        }
+
+        new MinecraftExceptionHandler<CommandSender>()
+                .withDefaultHandlers()
+                .apply(commandManager, audiences::sender);
+
+        minecraftHelp = new MinecraftHelp<>("/scenes help", audiences::sender, commandManager);
+
+        AnnotationParser<CommandSender> parser = new AnnotationParser<>(
+                commandManager,
+                CommandSender.class,
+                p -> CommandMeta.simple().build()
+        );
+        parser.parse(this);
+
+        SceneManagerImpl sceneManager = new SceneManagerImpl();
+        getServer().getPluginManager().registerEvents(sceneManager, this);
+        SceneManagerProvider.set(sceneManager);
+
+        manualController = sceneManager.createController(this);
+
+        for (IntegrationProvider provider : ServiceLoader.load(IntegrationProvider.class, getClassLoader())) {
+            if (provider.available()) {
+                String name = provider.name();
+                getLogger().info("Enabling " + name + " integration");
+                try {
+                    Integration integration = provider.create(this);
+                    parser.parse(integration);
+                    getServer().getPluginManager().registerEvents(integration, this);
+                    integrations.add(integration);
+                } catch (Throwable t) {
+                    getLogger().log(Level.SEVERE, "Failed to enable " + name + " integration", t);
+                }
+            }
+        }
+    }
+
+    @Override
+    public void onDisable() {
+        for (Integration integration : integrations) {
+            try {
+                integration.unregister();
+            } catch (Throwable t) {
+                getLogger().log(Level.SEVERE, "Failed to unregister integration", t);
+            }
+        }
+        integrations.clear();
+    }
+
+    @CommandMethod("scenes show <scene>")
+    @CommandPermission("scenes.show")
+    public void show(Player sender, @Argument(value = "scene", suggestions = "scene") String scene) {
+        manualController.show(sender, scene);
+    }
+
+    @CommandMethod("scenes hide <scene>")
+    @CommandPermission("scenes.hide")
+    public void hide(Player sender, @Argument(value = "scene", suggestions = "manual_scene") String scene) {
+        manualController.hide(sender, scene);
+    }
+
+    @Suggestions("scene")
+    public List<String> suggestScenes(CommandContext<CommandSender> context, String input) {
+        Set<String> scenes = new HashSet<>();
+        Bukkit.getPluginManager().callEvent(new SceneCompleteEvent(scenes));
+        return List.copyOf(scenes);
+    }
+
+    @Suggestions("manual_scene")
+    public List<String> suggestManualScenes(CommandContext<CommandSender> context, String input) {
+        if (context.getSender() instanceof Player player) {
+            return manualController.getShown(player);
+        }
+        return List.of();
+    }
+
+    @CommandMethod("scenes help [query]")
+    @CommandPermission("scenes.help")
+    public void help(CommandSender sender,
+                     @Argument(value = "query", suggestions = "help_queries") @Greedy String query) {
+        minecraftHelp.queryCommands(query != null ? query : "", sender);
+    }
+
+    @Suggestions("help_queries")
+    public List<String> suggestHelpQueries(CommandContext<CommandSender> context, String input) {
+        return commandManager.createCommandHelpHandler().queryRootIndex(context.getSender()).getEntries().stream().map(CommandHelpHandler.VerboseHelpEntry::getSyntaxString).toList();
+    }
+
+    public BukkitAudiences getAudiences() {
+        return audiences;
+    }
+
+    public PaperCommandManager<CommandSender> getCommandManager() {
+        return commandManager;
+    }
+}
