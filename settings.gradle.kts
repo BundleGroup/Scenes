@@ -1,7 +1,7 @@
-rootProject.name = "Scenes"
+rootProject.name = "BundleScenes"
 
-include(":scenes")
-include(":scenes-api")
-include(":scenes-entity")
-include(":scenes-traincarts")
-include(":scenes-worldguard")
+include(":bundlescenes")
+include(":bundlescenes-api")
+include(":bundlescenes-entity")
+include(":bundlescenes-traincarts")
+include(":bundlescenes-worldguard")
