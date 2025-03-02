@@ -1,19 +1,19 @@
 package gg.bundlegroup.bundlescenes.plugin;
 
-import cloud.commandframework.CommandHelpHandler;
-import cloud.commandframework.annotations.AnnotationParser;
-import cloud.commandframework.annotations.Argument;
-import cloud.commandframework.annotations.CommandMethod;
-import cloud.commandframework.annotations.CommandPermission;
-import cloud.commandframework.annotations.specifier.Greedy;
-import cloud.commandframework.annotations.suggestions.Suggestions;
-import cloud.commandframework.bukkit.CloudBukkitCapabilities;
-import cloud.commandframework.context.CommandContext;
-import cloud.commandframework.execution.CommandExecutionCoordinator;
-import cloud.commandframework.meta.CommandMeta;
-import cloud.commandframework.minecraft.extras.MinecraftExceptionHandler;
-import cloud.commandframework.minecraft.extras.MinecraftHelp;
-import cloud.commandframework.paper.PaperCommandManager;
+//import cloud.commandframework.CommandHelpHandler;
+//import cloud.commandframework.annotations.AnnotationParser;
+//import cloud.commandframework.annotations.Argument;
+//import cloud.commandframework.annotations.CommandMethod;
+//import cloud.commandframework.annotations.CommandPermission;
+//import cloud.commandframework.annotations.specifier.Greedy;
+//import cloud.commandframework.annotations.suggestions.Suggestions;
+//import cloud.commandframework.bukkit.CloudBukkitCapabilities;
+//import cloud.commandframework.context.CommandContext;
+//import cloud.commandframework.execution.CommandExecutionCoordinator;
+//import cloud.commandframework.meta.CommandMeta;
+//import cloud.commandframework.minecraft.extras.MinecraftExceptionHandler;
+//import cloud.commandframework.minecraft.extras.MinecraftHelp;
+//import cloud.commandframework.paper.PaperCommandManager;
 import gg.bundlegroup.bundlescenes.api.SceneManagerProvider;
 import gg.bundlegroup.bundlescenes.api.event.SceneClearEvent;
 import gg.bundlegroup.bundlescenes.api.event.SceneCompleteEvent;
@@ -26,23 +26,31 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.NotNull;
+import revxrsal.commands.Lamp;
+import revxrsal.commands.annotation.Command;
+import revxrsal.commands.annotation.SuggestWith;
+import revxrsal.commands.autocomplete.SuggestionProvider;
+import revxrsal.commands.bukkit.BukkitLamp;
+import revxrsal.commands.bukkit.actor.BukkitCommandActor;
+import revxrsal.commands.bukkit.annotation.CommandPermission;
+import revxrsal.commands.command.CommandActor;
+import revxrsal.commands.node.ExecutionContext;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.ServiceLoader;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 import java.util.logging.Level;
 
 public class ScenesPlugin extends JavaPlugin {
     private final Map<String, Integration> integrations = new HashMap<>();
     private BukkitAudiences audiences;
-    private PaperCommandManager<CommandSender> commandManager;
-    private MinecraftHelp<CommandSender> minecraftHelp;
+
+    private Lamp<BukkitCommandActor> lamp;
+
+//    private PaperCommandManager<CommandSender> commandManager;
+//    private MinecraftHelp<CommandSender> minecraftHelp;
     private SceneManagerImpl sceneManager;
-    private SceneControllerImpl manualController;
+    private static SceneControllerImpl manualController;
 
     @Override
     public void onLoad() {
@@ -69,31 +77,29 @@ public class ScenesPlugin extends JavaPlugin {
         audiences = BukkitAudiences.create(this);
 
         try {
-            commandManager = new PaperCommandManager<>(
-                    this,
-                    CommandExecutionCoordinator.simpleCoordinator(),
-                    Function.identity(),
-                    Function.identity());
+            lamp = BukkitLamp.builder(this).build();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
 
-        if (commandManager.hasCapability(CloudBukkitCapabilities.NATIVE_BRIGADIER)) {
-            commandManager.registerBrigadier();
-        }
+//        if (commandManager.hasCapability(CloudBukkitCapabilities.NATIVE_BRIGADIER)) {
+//            commandManager.registerBrigadier();
+//        }
 
-        new MinecraftExceptionHandler<CommandSender>()
-                .withDefaultHandlers()
-                .apply(commandManager, audiences::sender);
-
-        minecraftHelp = new MinecraftHelp<>("/scenes help", audiences::sender, commandManager);
-
-        AnnotationParser<CommandSender> parser = new AnnotationParser<>(
-                commandManager,
-                CommandSender.class,
-                p -> CommandMeta.simple().build()
-        );
-        parser.parse(this);
+//        new MinecraftExceptionHandler<CommandSender>()
+//                .withDefaultHandlers()
+//                .apply(commandManager, audiences::sender);
+//
+//        minecraftHelp = new MinecraftHelp<>("/scenes help", audiences::sender, commandManager);
+//
+//        AnnotationParser<CommandSender> parser = new AnnotationParser<>(
+//                commandManager,
+//                CommandSender.class,
+//                p -> CommandMeta.simple().build()
+//        );
+//        parser.parse(this);
+//
+        lamp.register(new Commands());
 
         sceneManager = new SceneManagerImpl();
         getServer().getPluginManager().registerEvents(sceneManager, this);
@@ -107,7 +113,7 @@ public class ScenesPlugin extends JavaPlugin {
             getLogger().info("Enabling " + name + " integration");
             try {
                 integration.enable();
-                parser.parse(integration);
+                lamp.register(integration);
                 getServer().getPluginManager().registerEvents(integration, this);
             } catch (Throwable t) {
                 getLogger().log(Level.SEVERE, "Failed to enable " + name + " integration", t);
@@ -129,87 +135,84 @@ public class ScenesPlugin extends JavaPlugin {
         integrations.clear();
     }
 
-    @CommandMethod("scenes show <scene>")
-    @CommandPermission("scenes.show")
-    public void show(Player sender, @Argument(value = "scene", suggestions = "scene") String scene) {
-        manualController.show(sender, scene);
-        TextComponent.Builder message = Component.text()
-                .content("Manually showing scene ")
-                .append(Component.text(scene, NamedTextColor.YELLOW))
-                .color(NamedTextColor.GREEN);
-        if (sender.hasPermission("scenes.hide")) {
-            message.append(Component.text(" (click to hide)"))
-                    .clickEvent(ClickEvent.runCommand("/scenes hide " + scene));
-        }
-        audiences.sender(sender).sendMessage(message);
-    }
+    public class Commands {
 
-    @CommandMethod("scenes hide <scene>")
-    @CommandPermission("scenes.hide")
-    public void hide(Player sender, @Argument(value = "scene", suggestions = "manual_scene") String scene) {
-        manualController.hide(sender, scene);
-        audiences.sender(sender).sendMessage(Component.text()
-                .content("No longer manually showing scene ")
-                .append(Component.text(scene, NamedTextColor.YELLOW))
-                .color(NamedTextColor.GREEN));
 
-        Set<SceneControllerImpl> controllers = sceneManager.getVisibilityReason(sender, scene);
-        for (SceneControllerImpl controller : controllers) {
-            String name = controller.name();
+        @Command("scenes show")
+        @CommandPermission("scenes.show")
+        public void show(BukkitCommandActor sender, @SuggestWith(ScenesList.class) String scene) {
+            manualController.show(sender.asPlayer(), scene);
             TextComponent.Builder message = Component.text()
-                    .content("Plugin ")
-                    .append(Component.text(controller.plugin().getName(), NamedTextColor.YELLOW))
-                    .append(Component.text(" is still showing it"))
-                    .color(NamedTextColor.GRAY);
-            if (name != null) {
-                message.append(Component.text(": " + name));
+                    .content("Manually showing scene ")
+                    .append(Component.text(scene, NamedTextColor.YELLOW))
+                    .color(NamedTextColor.GREEN);
+            if (sender.asPlayer().hasPermission("scenes.hide")) {
+                message.append(Component.text(" (click to hide)"))
+                        .clickEvent(ClickEvent.runCommand("/scenes hide " + scene));
             }
-            audiences.sender(sender).sendMessage(message);
+            audiences.sender(sender.asPlayer()).sendMessage(message);
         }
-    }
 
-    @CommandMethod("scenes clear <scene>")
-    @CommandPermission("scenes.clear")
-    public void clear(CommandSender sender, @Argument(value = "scene", suggestions = "scene") String scene) {
-        Bukkit.getPluginManager().callEvent(new SceneClearEvent(scene));
-        audiences.sender(sender).sendMessage(Component.text()
-                .content("Removed everything from scene ")
-                .append(Component.text(scene, NamedTextColor.YELLOW))
-                .color(NamedTextColor.GREEN));
-    }
+        @Command("scenes hide")
+        @CommandPermission("scenes.hide")
+        public void hide(BukkitCommandActor sender,
+                         @SuggestWith(ScenesList.class) String scene) {
+            manualController.hide(sender.asPlayer(), scene);
+            audiences.sender(sender.asPlayer()).sendMessage(Component.text()
+                    .content("No longer manually showing scene ")
+                    .append(Component.text(scene, NamedTextColor.YELLOW))
+                    .color(NamedTextColor.GREEN));
 
-    @Suggestions("scene")
-    public List<String> suggestScenes(CommandContext<CommandSender> context, String input) {
-        Set<String> scenes = new HashSet<>();
-        Bukkit.getPluginManager().callEvent(new SceneCompleteEvent(scenes));
-        return List.copyOf(scenes);
-    }
-
-    @Suggestions("manual_scene")
-    public List<String> suggestManualScenes(CommandContext<CommandSender> context, String input) {
-        if (context.getSender() instanceof Player player) {
-            return manualController.getShown(player);
+            Set<SceneControllerImpl> controllers = sceneManager.getVisibilityReason(sender.asPlayer(), scene);
+            for (SceneControllerImpl controller : controllers) {
+                String name = controller.name();
+                TextComponent.Builder message = Component.text()
+                        .content("Plugin ")
+                        .append(Component.text(controller.plugin().getName(), NamedTextColor.YELLOW))
+                        .append(Component.text(" is still showing it"))
+                        .color(NamedTextColor.GRAY);
+                if (name != null) {
+                    message.append(Component.text(": " + name));
+                }
+                audiences.sender(sender.asPlayer()).sendMessage(message);
+            }
         }
-        return List.of();
-    }
 
-    @CommandMethod("scenes help [query]")
-    @CommandPermission("scenes.help")
-    public void help(CommandSender sender,
-                     @Argument(value = "query", suggestions = "help_queries") @Greedy String query) {
-        minecraftHelp.queryCommands(query != null ? query : "", sender);
-    }
+        @Command("scenes clear")
+        @CommandPermission("scenes.clear")
+        public void clear(BukkitCommandActor sender, @SuggestWith(ScenesList.class) String scene) {
+            Bukkit.getPluginManager().callEvent(new SceneClearEvent(scene));
+            audiences.sender(sender.asPlayer()).sendMessage(Component.text()
+                    .content("Removed everything from scene ")
+                    .append(Component.text(scene, NamedTextColor.YELLOW))
+                    .color(NamedTextColor.GREEN));
+        }
 
-    @Suggestions("help_queries")
-    public List<String> suggestHelpQueries(CommandContext<CommandSender> context, String input) {
-        return commandManager.createCommandHelpHandler().queryRootIndex(context.getSender()).getEntries().stream().map(CommandHelpHandler.VerboseHelpEntry::getSyntaxString).toList();
+        private static final class ScenesList implements SuggestionProvider<BukkitCommandActor> {
+            @Override
+            public @NotNull List<String> getSuggestions(@NotNull ExecutionContext<BukkitCommandActor> context) {
+                Set<String> scenes = new HashSet<>();
+                Bukkit.getPluginManager().callEvent(new SceneCompleteEvent(scenes));
+                return List.copyOf(scenes);
+            }
+        }
+
+        private static final class ManualScenesList implements SuggestionProvider<BukkitCommandActor> {
+            @Override
+            public @NotNull Collection<String> getSuggestions(@NotNull ExecutionContext<BukkitCommandActor> executionContext) {
+                if (executionContext.actor() instanceof Player) {
+                    return manualController.getShown(executionContext.actor().asPlayer());
+                }
+                return List.of();
+            }
+        }
     }
 
     public BukkitAudiences getAudiences() {
         return audiences;
     }
 
-    public PaperCommandManager<CommandSender> getCommandManager() {
-        return commandManager;
+    public Lamp<BukkitCommandActor> getCommandManager() {
+        return lamp;
     }
 }

@@ -1,9 +1,5 @@
 package gg.bundlegroup.bundlescenes.entity;
 
-import cloud.commandframework.annotations.Argument;
-import cloud.commandframework.annotations.CommandMethod;
-import cloud.commandframework.annotations.CommandPermission;
-import cloud.commandframework.bukkit.arguments.selector.MultipleEntitySelector;
 import gg.bundlegroup.bundlescenes.api.SceneManager;
 import gg.bundlegroup.bundlescenes.api.event.SceneClearEvent;
 import gg.bundlegroup.bundlescenes.api.event.SceneCompleteEvent;
@@ -30,13 +26,15 @@ import org.bukkit.event.world.EntitiesLoadEvent;
 import org.bukkit.event.world.EntitiesUnloadEvent;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
+import org.jetbrains.annotations.NotNull;
+import revxrsal.commands.annotation.Command;
+import revxrsal.commands.annotation.SuggestWith;
+import revxrsal.commands.autocomplete.SuggestionProvider;
+import revxrsal.commands.bukkit.actor.BukkitCommandActor;
+import revxrsal.commands.bukkit.annotation.CommandPermission;
+import revxrsal.commands.node.ExecutionContext;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.WeakHashMap;
+import java.util.*;
 
 @SuppressWarnings("deprecation")
 public class EntityIntegration implements Integration, Listener {
@@ -221,13 +219,15 @@ public class EntityIntegration implements Integration, Listener {
         }
     }
 
-    @CommandMethod("scenes assign <entity> [scene]")
+    @Command("scenes assign")
     @CommandPermission("scenes.assign.entity")
-    public void assign(CommandSender sender,
-                       @Argument("entity") MultipleEntitySelector entities,
-                       @Argument(value = "scene", suggestions = "scene") String scene) {
+    public void assign(BukkitCommandActor sender,
+
+                       @SuggestWith(ScenesList.class) String scene,
+                       List<Entity> entities
+                       ) {
         int count = 0;
-        for (Entity entity : entities.getEntities()) {
+        for (Entity entity : entities) {
             if (deniedTypes.contains(entity.getType())) {
                 continue;
             }
@@ -241,14 +241,14 @@ public class EntityIntegration implements Integration, Listener {
             count++;
         }
         if (scene != null) {
-            plugin.getAudiences().sender(sender).sendMessage(Component.text()
+            plugin.getAudiences().sender(sender.asPlayer()).sendMessage(Component.text()
                     .content("Assigned ")
                     .append(Component.text(count, NamedTextColor.YELLOW))
                     .append(Component.text(" entities to scene "))
                     .append(Component.text(scene, NamedTextColor.YELLOW))
                     .color(NamedTextColor.GREEN));
         } else {
-            plugin.getAudiences().sender(sender).sendMessage(Component.text()
+            plugin.getAudiences().sender(sender.asPlayer()).sendMessage(Component.text()
                     .content("Removed ")
                     .append(Component.text(count, NamedTextColor.YELLOW))
                     .append(Component.text(" entities from their scene"))
@@ -256,7 +256,7 @@ public class EntityIntegration implements Integration, Listener {
         }
     }
 
-    @CommandMethod("scenes showall")
+    @Command("scenes showall")
     @CommandPermission("scenes.show.all")
     public void showAll(Player sender) {
         // Show all entities, even if they should be hidden
@@ -267,7 +267,7 @@ public class EntityIntegration implements Integration, Listener {
                 Component.text("Showing all entities", NamedTextColor.GREEN));
     }
 
-    @CommandMethod("scenes hideall")
+    @Command("scenes hideall")
     @CommandPermission("scenes.hide.all")
     public void hideAll(Player sender) {
         // Hide all entities which are supposed to be hidden
@@ -280,5 +280,14 @@ public class EntityIntegration implements Integration, Listener {
         }
         plugin.getAudiences().sender(sender).sendMessage(
                 Component.text("No longer showing all entities", NamedTextColor.GREEN));
+    }
+
+    private static final class ScenesList implements SuggestionProvider<BukkitCommandActor> {
+        @Override
+        public @NotNull List<String> getSuggestions(@NotNull ExecutionContext<BukkitCommandActor> context) {
+            Set<String> scenes = new HashSet<>();
+            Bukkit.getPluginManager().callEvent(new SceneCompleteEvent(scenes));
+            return List.copyOf(scenes);
+        }
     }
 }

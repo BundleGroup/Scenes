@@ -8,5 +8,5 @@ repositories {
 
 dependencies {
     implementation(project(":bundlescenes"))
-    compileOnly("com.sk89q.worldguard:worldguard-bukkit:7.0.7")
+    compileOnly("com.sk89q.worldguard:worldguard-bukkit:7.0.13-SNAPSHOT")
 }

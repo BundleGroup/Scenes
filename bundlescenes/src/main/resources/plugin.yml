@@ -1,0 +1,5 @@
+name: BundleScenes
+version: 0.0.2
+main: gg.bundlegroup.bundlescenes.plugin.ScenesPlugin
+author: ItzPolar
+api-version: '1.21.4'
