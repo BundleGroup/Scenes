@@ -32,6 +32,7 @@ import revxrsal.commands.annotation.SuggestWith;
 import revxrsal.commands.autocomplete.SuggestionProvider;
 import revxrsal.commands.bukkit.actor.BukkitCommandActor;
 import revxrsal.commands.bukkit.annotation.CommandPermission;
+import revxrsal.commands.bukkit.parameters.EntitySelector;
 import revxrsal.commands.node.ExecutionContext;
 
 import java.util.*;
@@ -224,7 +225,7 @@ public class EntityIntegration implements Integration, Listener {
     public void assign(BukkitCommandActor sender,
 
                        @SuggestWith(ScenesList.class) String scene,
-                       List<Entity> entities
+                        EntitySelector<Entity> entities
                        ) {
         int count = 0;
         for (Entity entity : entities) {
