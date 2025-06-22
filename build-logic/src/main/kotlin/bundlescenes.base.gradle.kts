@@ -9,6 +9,7 @@ repositories {
         name = "atlas"
         credentials(PasswordCredentials::class)
     }
+    maven("https://maven.enginehub.org/repo/")
 }
 
 java {

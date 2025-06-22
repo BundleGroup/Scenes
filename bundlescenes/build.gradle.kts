@@ -6,6 +6,7 @@ plugins {
 dependencies {
     api(project(":bundlescenes-api"))
     compileOnly(libs.paper.api)
+    compileOnly(libs.worldguard.bukkit)
     implementation(libs.cloud.paper)
 }
 

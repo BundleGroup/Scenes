@@ -5,6 +5,7 @@ import gg.bundlegroup.bundleentities.api.entity.VirtualEntity;
 import gg.bundlegroup.bundleentities.api.entity.VirtualEntityFactory;
 import gg.bundlegroup.bundleentities.api.tracker.EntityTracker;
 import gg.bundlegroup.bundlescenes.Main;
+import gg.bundlegroup.bundlescenes.api.BundleScenes;
 import gg.bundlegroup.bundlescenes.chunk.ChunkManager;
 import gg.bundlegroup.bundlescenes.chunk.TrackedChunk;
 import gg.bundlegroup.bundlescenes.conversion.converter.EntityConverter;
@@ -34,6 +35,7 @@ public class EntityConversion {
     private static final NamespacedKey UUID_KEY = new NamespacedKey(Main.NAMESPACE, "uuid");
     private static final NamespacedKey SNAPSHOT_KEY = new NamespacedKey(Main.NAMESPACE, "snapshot");
     private static final NamespacedKey LOCATION_KEY = new NamespacedKey(Main.NAMESPACE, "location");
+    private static final NamespacedKey SCENE_KEY = new NamespacedKey(Main.NAMESPACE, "scene");
 
     private final EntityConverterRegistry registry;
     private final ChunkManager chunkManager;
@@ -66,7 +68,13 @@ public class EntityConversion {
             UUID uuid = entity.getUniqueId();
             entityContainers.removeIf(c -> Objects.equals(c.get(UUID_KEY, UUIDDataType.INSTANCE), uuid));
 
-            PersistentDataContainer entityContainer = convertEntity(trackedChunk, entity, tracker, factory, pdc.getAdapterContext());
+            EntityTracker entityTracker = tracker;
+            String sceneName = entity.getPersistentDataContainer().get(SCENE_KEY, PersistentDataType.STRING);
+            if (sceneName != null) {
+                entityTracker = BundleScenes.get().getSceneEntityTracker(sceneName);
+            }
+
+            PersistentDataContainer entityContainer = convertEntity(trackedChunk, entity, entityTracker, factory, pdc.getAdapterContext());
             if (entityContainer != null) {
                 entityContainers.add(entityContainer);
                 entity.remove();
@@ -148,7 +156,13 @@ public class EntityConversion {
                     continue;
                 }
 
-                VirtualEntity virtualEntity = converter.convert(entity, location, tracker, factory);
+                EntityTracker entityTracker = tracker;
+                String sceneName = entity.getPersistentDataContainer().get(SCENE_KEY, PersistentDataType.STRING);
+                if (sceneName != null) {
+                    entityTracker = BundleScenes.get().getSceneEntityTracker(sceneName);
+                }
+
+                VirtualEntity virtualEntity = converter.convert(entity, location, entityTracker, factory);
                 trackedChunk.addConvertedEntity(uuid, virtualEntity);
                 virtualEntity.show();
                 remainingContainers.add(entityContainer);

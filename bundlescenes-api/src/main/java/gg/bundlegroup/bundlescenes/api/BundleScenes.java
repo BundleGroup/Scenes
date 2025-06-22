@@ -10,6 +10,8 @@ import java.util.Objects;
 public interface BundleScenes {
     EntityTracker getChunkEntityTracker(Chunk chunk);
 
+    EntityTracker getSceneEntityTracker(String name);
+
     static BundleScenes get() {
         return Objects.requireNonNull(BundleScenesProvider.instance);
     }
