@@ -2,7 +2,9 @@ package gg.bundlegroup.bundlescenes.conversion.converter;
 
 import gg.bundlegroup.bundleentities.api.entity.VirtualDisplay;
 import org.bukkit.entity.Display;
+import org.jspecify.annotations.NullMarked;
 
+@NullMarked
 public abstract class AbstractDisplayConverter<E extends Display, V extends VirtualDisplay> extends AbstractEntityConverter<E, V> {
     @Override
     protected void configure(V virtual, E entity) {

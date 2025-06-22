@@ -1,10 +1,13 @@
 package gg.bundlegroup.bundlescenes.conversion.converter;
 
 import gg.bundlegroup.bundleentities.api.entity.VirtualEntity;
+import gg.bundlegroup.bundleentities.api.entity.VirtualEntityEquipment;
 import gg.bundlegroup.bundleentities.api.entity.VirtualEntityFactory;
 import gg.bundlegroup.bundleentities.api.tracker.EntityTracker;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
+import org.bukkit.inventory.EntityEquipment;
+import org.bukkit.inventory.EquipmentSlot;
 import org.joml.Vector3d;
 import org.jspecify.annotations.NullMarked;
 
@@ -33,5 +36,11 @@ public abstract class AbstractEntityConverter<E extends Entity, V extends Virtua
         virtual.setNoGravity(!entity.hasGravity());
         virtual.setPose(entity.getPose());
         virtual.setFrozenTicks(entity.getFreezeTicks());
+    }
+
+    protected void configure(VirtualEntityEquipment virtual, EntityEquipment equipment) {
+        for (EquipmentSlot slot : EquipmentSlot.values()) {
+            virtual.setItem(slot, equipment.getItem(slot));
+        }
     }
 }

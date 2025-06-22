@@ -21,7 +21,7 @@ public class EntityConversionManager {
         this.plugin = plugin;
         this.registry = new EntityConverterRegistry();
         this.conversion = new EntityConversion(registry, chunkManager);
-        plugin.getServer().getPluginManager().registerEvents(new EntityConversionLoaderListener(plugin, conversion), plugin);
+        plugin.getServer().getPluginManager().registerEvents(new EntityConversionLoaderListener(conversion), plugin);
     }
 
     public EntityConversion getConversion() {
@@ -51,8 +51,9 @@ public class EntityConversionManager {
     public void setAutoConvert(boolean autoConvert) {
         if (autoConvert) {
             if (autoConversionListener == null) {
-                autoConversionListener = new EntityAutoConversionListener(plugin, conversion);
+                autoConversionListener = new EntityAutoConversionListener(conversion);
                 plugin.getServer().getPluginManager().registerEvents(autoConversionListener, plugin);
+                plugin.getLogger().info("Enabled automatic entity conversion");
                 for (World world : Bukkit.getServer().getWorlds()) {
                     for (Chunk chunk : world.getLoadedChunks()) {
                         conversion.convertEntities(chunk);
@@ -62,6 +63,7 @@ public class EntityConversionManager {
         } else {
             if (autoConversionListener != null) {
                 HandlerList.unregisterAll(autoConversionListener);
+                plugin.getLogger().info("Disabled automatic entity conversion");
                 autoConversionListener = null;
             }
         }

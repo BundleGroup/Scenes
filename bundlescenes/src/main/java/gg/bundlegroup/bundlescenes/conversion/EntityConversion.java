@@ -72,6 +72,9 @@ public class EntityConversion {
             String sceneName = entity.getPersistentDataContainer().get(SCENE_KEY, PersistentDataType.STRING);
             if (sceneName != null) {
                 entityTracker = BundleScenes.get().getSceneEntityTracker(sceneName);
+                if (entityTracker == null) {
+                    entityTracker = tracker;
+                }
             }
 
             PersistentDataContainer entityContainer = convertEntity(trackedChunk, entity, entityTracker, factory, pdc.getAdapterContext());
@@ -160,6 +163,9 @@ public class EntityConversion {
                 String sceneName = entity.getPersistentDataContainer().get(SCENE_KEY, PersistentDataType.STRING);
                 if (sceneName != null) {
                     entityTracker = BundleScenes.get().getSceneEntityTracker(sceneName);
+                    if (entityTracker == null) {
+                        entityTracker = tracker;
+                    }
                 }
 
                 VirtualEntity virtualEntity = converter.convert(entity, location, entityTracker, factory);

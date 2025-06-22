@@ -6,11 +6,15 @@ import gg.bundlegroup.bundlescenes.api.BundleScenesProvider;
 import gg.bundlegroup.bundlescenes.chunk.ChunkManager;
 import gg.bundlegroup.bundlescenes.conversion.EntityConversionManager;
 import gg.bundlegroup.bundlescenes.conversion.command.ConversionCommands;
+import gg.bundlegroup.bundlescenes.conversion.converter.ArmorStandConverter;
+import gg.bundlegroup.bundlescenes.conversion.converter.BlockDisplayConverter;
 import gg.bundlegroup.bundlescenes.conversion.converter.ItemDisplayConverter;
 import gg.bundlegroup.bundlescenes.conversion.converter.TextDisplayConverter;
 import gg.bundlegroup.bundlescenes.worldguard.WorldGuardSupport;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
+import org.bukkit.entity.ArmorStand;
+import org.bukkit.entity.BlockDisplay;
 import org.bukkit.entity.ItemDisplay;
 import org.bukkit.entity.TextDisplay;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -29,6 +33,10 @@ public class Main extends JavaPlugin implements BundleScenes {
 
     private @Nullable ChunkManager chunkManager;
     private @Nullable WorldGuardSupport worldGuardSupport;
+
+    public static boolean isAutoConvertEnabled() {
+        return Objects.equals(System.getenv("BUNDLE_SCENES_AUTO_CONVERT"), "true");
+    }
 
     @Override
     public void onLoad() {
@@ -54,9 +62,12 @@ public class Main extends JavaPlugin implements BundleScenes {
         BundleScenesProvider.setInstance(this);
 
         EntityConversionManager entityConversionManager = new EntityConversionManager(this, chunkManager);
+        entityConversionManager.getRegistry().register(ArmorStand.class, new ArmorStandConverter());
+        entityConversionManager.getRegistry().register(BlockDisplay.class, new BlockDisplayConverter());
         entityConversionManager.getRegistry().register(ItemDisplay.class, new ItemDisplayConverter());
         entityConversionManager.getRegistry().register(TextDisplay.class, new TextDisplayConverter());
-        entityConversionManager.setAutoConvert(Objects.equals(System.getenv("BUNDLE_SCENES_AUTO_CONVERT"), "true"));
+        entityConversionManager.setAutoConvert(Main.isAutoConvertEnabled());
+        entityConversionManager.loadAllEntities();
         commandManager.command(new ConversionCommands(entityConversionManager));
     }
 
@@ -78,11 +89,11 @@ public class Main extends JavaPlugin implements BundleScenes {
     }
 
     @Override
-    public EntityTracker getSceneEntityTracker(String name) {
+    public @Nullable EntityTracker getSceneEntityTracker(String name) {
         if (worldGuardSupport != null) {
             return worldGuardSupport.getSceneManager().getTracker(name);
         } else {
-            throw new IllegalStateException("WorldGuard is not enabled");
+            return null;
         }
     }
 }
