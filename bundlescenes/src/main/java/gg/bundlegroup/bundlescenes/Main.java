@@ -7,10 +7,12 @@ import gg.bundlegroup.bundlescenes.chunk.ChunkManager;
 import gg.bundlegroup.bundlescenes.conversion.EntityConversionManager;
 import gg.bundlegroup.bundlescenes.conversion.command.ConversionCommands;
 import gg.bundlegroup.bundlescenes.conversion.converter.ItemDisplayConverter;
+import gg.bundlegroup.bundlescenes.conversion.converter.TextDisplayConverter;
 import gg.bundlegroup.bundlescenes.worldguard.WorldGuardSupport;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.entity.ItemDisplay;
+import org.bukkit.entity.TextDisplay;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.incendo.cloud.execution.ExecutionCoordinator;
 import org.incendo.cloud.paper.PaperCommandManager;
@@ -49,12 +51,13 @@ public class Main extends JavaPlugin implements BundleScenes {
                 .executionCoordinator(ExecutionCoordinator.simpleCoordinator())
                 .buildOnEnable(this);
 
+        BundleScenesProvider.setInstance(this);
+
         EntityConversionManager entityConversionManager = new EntityConversionManager(this, chunkManager);
         entityConversionManager.getRegistry().register(ItemDisplay.class, new ItemDisplayConverter());
+        entityConversionManager.getRegistry().register(TextDisplay.class, new TextDisplayConverter());
         entityConversionManager.setAutoConvert(Objects.equals(System.getenv("BUNDLE_SCENES_AUTO_CONVERT"), "true"));
         commandManager.command(new ConversionCommands(entityConversionManager));
-
-        BundleScenesProvider.setInstance(this);
     }
 
     @Override
