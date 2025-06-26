@@ -31,11 +31,11 @@ import java.util.UUID;
 
 @NullMarked
 public class EntityConversion {
+    public static final NamespacedKey SCENE_KEY = new NamespacedKey(Main.NAMESPACE, "scene");
     private static final NamespacedKey ENTITIES_KEY = new NamespacedKey(Main.NAMESPACE, "entities");
     private static final NamespacedKey UUID_KEY = new NamespacedKey(Main.NAMESPACE, "uuid");
     private static final NamespacedKey SNAPSHOT_KEY = new NamespacedKey(Main.NAMESPACE, "snapshot");
     private static final NamespacedKey LOCATION_KEY = new NamespacedKey(Main.NAMESPACE, "location");
-    private static final NamespacedKey SCENE_KEY = new NamespacedKey(Main.NAMESPACE, "scene");
 
     private final EntityConverterRegistry registry;
     private final ChunkManager chunkManager;

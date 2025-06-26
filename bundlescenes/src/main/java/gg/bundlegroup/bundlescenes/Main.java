@@ -6,6 +6,7 @@ import gg.bundlegroup.bundlescenes.api.BundleScenesProvider;
 import gg.bundlegroup.bundlescenes.chunk.ChunkManager;
 import gg.bundlegroup.bundlescenes.conversion.EntityConversionManager;
 import gg.bundlegroup.bundlescenes.conversion.command.ConversionCommands;
+import gg.bundlegroup.bundlescenes.conversion.command.preprocessor.EntityConversionManagerPreprocessor;
 import gg.bundlegroup.bundlescenes.conversion.converter.ArmorStandConverter;
 import gg.bundlegroup.bundlescenes.conversion.converter.BlockDisplayConverter;
 import gg.bundlegroup.bundlescenes.conversion.converter.ItemDisplayConverter;
@@ -51,13 +52,13 @@ public class Main extends JavaPlugin implements BundleScenes {
     public void onEnable() {
         chunkManager = new ChunkManager(this);
 
-        if (worldGuardSupport != null) {
-            worldGuardSupport.enable();
-        }
-
         PaperCommandManager<Source> commandManager = PaperCommandManager.builder(PaperSimpleSenderMapper.simpleSenderMapper())
                 .executionCoordinator(ExecutionCoordinator.simpleCoordinator())
                 .buildOnEnable(this);
+
+        if (worldGuardSupport != null) {
+            worldGuardSupport.enable(commandManager);
+        }
 
         BundleScenesProvider.setInstance(this);
 
@@ -68,7 +69,9 @@ public class Main extends JavaPlugin implements BundleScenes {
         entityConversionManager.getRegistry().register(TextDisplay.class, new TextDisplayConverter());
         entityConversionManager.setAutoConvert(Main.isAutoConvertEnabled());
         entityConversionManager.loadAllEntities();
-        commandManager.command(new ConversionCommands(entityConversionManager));
+
+        commandManager.registerCommandPreProcessor(new EntityConversionManagerPreprocessor<>(entityConversionManager));
+        commandManager.command(new ConversionCommands());
     }
 
     @Override

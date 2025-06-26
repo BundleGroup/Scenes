@@ -7,11 +7,16 @@ import org.bukkit.Chunk;
 import org.bukkit.World;
 import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.Plugin;
+import org.incendo.cloud.key.CloudKey;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
+import static org.incendo.cloud.key.CloudKey.cloudKey;
+
 @NullMarked
 public class EntityConversionManager {
+    public static final CloudKey<EntityConversionManager> KEY = cloudKey("entity_conversion_manager", EntityConversionManager.class);
+
     private final Plugin plugin;
     private final EntityConverterRegistry registry;
     private final EntityConversion conversion;

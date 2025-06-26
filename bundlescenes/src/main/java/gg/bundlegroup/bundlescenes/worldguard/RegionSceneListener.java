@@ -18,7 +18,7 @@ public class RegionSceneListener implements Listener {
     @EventHandler
     public void onQuit(PlayerQuitEvent event) {
         Player player = event.getPlayer();
-        for (PlayerListEntityTracker tracker : manager.getTrackers()) {
+        for (PlayerListEntityTracker tracker : manager.getTrackers().values()) {
             tracker.removeViewer(player);
         }
     }

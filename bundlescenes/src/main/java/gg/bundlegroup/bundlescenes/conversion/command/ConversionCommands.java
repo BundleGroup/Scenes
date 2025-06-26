@@ -1,6 +1,7 @@
 package gg.bundlegroup.bundlescenes.conversion.command;
 
 import gg.bundlegroup.bundlescenes.Main;
+import gg.bundlegroup.bundlescenes.MessageStyle;
 import gg.bundlegroup.bundlescenes.conversion.EntityConversionManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
@@ -21,17 +22,10 @@ import java.util.List;
 import java.util.Map;
 
 import static net.kyori.adventure.text.Component.text;
-import static net.kyori.adventure.text.format.NamedTextColor.*;
 import static org.incendo.cloud.key.CloudKey.cloudKey;
 
 @NullMarked
 public class ConversionCommands implements CommandFactory<Source> {
-    private final EntityConversionManager entityConversionManager;
-
-    public ConversionCommands(EntityConversionManager entityConversionManager) {
-        this.entityConversionManager = entityConversionManager;
-    }
-
     @Override
     public List<Command<? extends Source>> createCommands(CommandManager<Source> commandManager) {
         Command.Builder<Source> root = commandManager.commandBuilder("scenes")
@@ -42,6 +36,7 @@ public class ConversionCommands implements CommandFactory<Source> {
         commands.add(root.literal("convert")
                 .required(entityKey, MultipleEntitySelectorParser.multipleEntitySelectorParser())
                 .handler(context -> {
+                    EntityConversionManager entityConversionManager = context.get(EntityConversionManager.KEY);
                     MultipleEntitySelector entitySelector = context.get(entityKey);
 
                     Map<Chunk, List<Entity>> entitiesByChunk = new HashMap<>();
@@ -56,13 +51,14 @@ public class ConversionCommands implements CommandFactory<Source> {
                                 .convertEntities(entry.getKey(), entry.getValue());
                     }
 
-                    context.sender().source().sendMessage(text("Converted ", GREEN)
-                            .append(text(count, DARK_GREEN))
+                    context.sender().source().sendMessage(text("Converted ", MessageStyle.SUCCESS)
+                            .append(text(count, MessageStyle.SUCCESS_ACCENT))
                             .append(text(" entities")));
                 })
                 .build());
         commands.add(root.literal("restore")
                 .handler(context -> {
+                    EntityConversionManager entityConversionManager = context.get(EntityConversionManager.KEY);
                     entityConversionManager.setAutoConvert(false);
 
                     int count = 0;
@@ -72,30 +68,32 @@ public class ConversionCommands implements CommandFactory<Source> {
                         }
                     }
 
-                    context.sender().source().sendMessage(text("Restored ", GREEN)
-                            .append(text(count, DARK_GREEN))
+                    context.sender().source().sendMessage(text("Restored ", MessageStyle.SUCCESS)
+                            .append(text(count, MessageStyle.SUCCESS_ACCENT))
                             .append(text(" entities")));
                 })
                 .build());
         if (Main.isAutoConvertEnabled()) {
             commands.add(root.literal("enable")
                     .handler(context -> {
+                        EntityConversionManager entityConversionManager = context.get(EntityConversionManager.KEY);
                         if (entityConversionManager.isAutoConvert()) {
-                            context.sender().source().sendMessage(text("Automatic entity conversion is already enabled", RED));
+                            context.sender().source().sendMessage(text("Automatic entity conversion is already enabled", MessageStyle.ERROR));
                             return;
                         }
                         entityConversionManager.setAutoConvert(true);
-                        context.sender().source().sendMessage(text("Enabled automatic entity conversion", GREEN));
+                        context.sender().source().sendMessage(text("Enabled automatic entity conversion", MessageStyle.SUCCESS));
                     })
                     .build());
             commands.add(root.literal("disable")
                     .handler(context -> {
+                        EntityConversionManager entityConversionManager = context.get(EntityConversionManager.KEY);
                         if (!entityConversionManager.isAutoConvert()) {
-                            context.sender().source().sendMessage(text("Automatic entity conversion is already disabled", RED));
+                            context.sender().source().sendMessage(text("Automatic entity conversion is already disabled", MessageStyle.ERROR));
                             return;
                         }
                         entityConversionManager.setAutoConvert(false);
-                        context.sender().source().sendMessage(text("Disabled automatic entity conversion", GREEN));
+                        context.sender().source().sendMessage(text("Disabled automatic entity conversion", MessageStyle.SUCCESS));
                     })
                     .build());
         }
