@@ -31,7 +31,7 @@ public interface BundleScenes {
 
     ChunkSceneProvider chunk(World world, int x, int z);
 
-    static BundleScenes chunk() {
+    static BundleScenes get() {
         return Objects.requireNonNull(BundleScenesProvider.instance);
     }
 }
