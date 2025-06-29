@@ -14,4 +14,7 @@ public final class MessageStyle {
 
     public static final Style ERROR = style(RED);
     public static final Style ERROR_ACCENT = style(DARK_RED);
+
+    public static final Style INFO = style(BLUE);
+    public static final Style INFO_ACCENT = style(AQUA);
 }

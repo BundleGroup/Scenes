@@ -5,7 +5,6 @@ plugins {
 
 dependencies {
     compileOnly(libs.paper.api)
-    compileOnlyApi(libs.bundleentities.api)
 }
 
 publishing {

@@ -1,0 +1,9 @@
+name: "BundleScenes"
+main: "gg.bundlegroup.bundlescenes.plugin.Main"
+version: "${version}"
+api-version: "1.21.5"
+dependencies:
+  server:
+    WorldGuard:
+      load: BEFORE
+      required: false

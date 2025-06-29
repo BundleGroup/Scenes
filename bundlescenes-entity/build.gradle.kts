@@ -4,6 +4,5 @@ plugins {
 
 dependencies {
     compileOnly(libs.paper.api)
-    api(project(":bundlescenes-api"))
-    api(libs.cloud.paper)
+    compileOnly(project(":bundlescenes"))
 }

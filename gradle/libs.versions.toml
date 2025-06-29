@@ -1,12 +1,10 @@
 [versions]
-bundleentities = "1.0.0-SNAPSHOT"
 cloud-minecraft = "2.0.0-beta.10"
 paper = "1.21.5-R0.1-SNAPSHOT"
 shadow = "9.0.0-beta17"
 worldguard = "7.0.14"
 
 [libraries]
-bundleentities-api = { module = "gg.bundlegroup.bundleentities:bundleentities-api", version.ref = "bundleentities" }
 cloud-paper = { module = "org.incendo:cloud-paper", version.ref = "cloud-minecraft" }
 paper-api = { module = "io.papermc.paper:paper-api", version.ref = "paper" }
 worldguard-bukkit = { module = "com.sk89q.worldguard:worldguard-bukkit", version.ref = "worldguard" }

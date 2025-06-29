@@ -1,20 +1,37 @@
 package gg.bundlegroup.bundlescenes.api;
 
-import gg.bundlegroup.bundleentities.api.tracker.EntityTracker;
+import gg.bundlegroup.bundlescenes.api.controller.Controller;
+import gg.bundlegroup.bundlescenes.api.scene.ChunkSceneProvider;
+import gg.bundlegroup.bundlescenes.api.scene.Scene;
+import net.kyori.adventure.key.Key;
 import org.bukkit.Chunk;
+import org.bukkit.Location;
+import org.bukkit.World;
+import org.bukkit.plugin.Plugin;
 import org.jspecify.annotations.NullMarked;
-import org.jspecify.annotations.Nullable;
 
+import java.util.Collection;
 import java.util.Objects;
 
 @NullMarked
 public interface BundleScenes {
-    EntityTracker getChunkEntityTracker(Chunk chunk);
+    Controller createController(Plugin plugin, Key key);
 
-    @Nullable
-    EntityTracker getSceneEntityTracker(String name);
+    Scene scene(Key key);
 
-    static BundleScenes get() {
+    Collection<Scene> scenes();
+
+    default ChunkSceneProvider chunk(Location location) {
+        return chunk(location.getChunk());
+    }
+
+    default ChunkSceneProvider chunk(Chunk chunk) {
+        return chunk(chunk.getWorld(), chunk.getX(), chunk.getZ());
+    }
+
+    ChunkSceneProvider chunk(World world, int x, int z);
+
+    static BundleScenes chunk() {
         return Objects.requireNonNull(BundleScenesProvider.instance);
     }
 }

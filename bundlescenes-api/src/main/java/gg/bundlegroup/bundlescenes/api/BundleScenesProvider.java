@@ -10,7 +10,7 @@ public final class BundleScenesProvider {
 
     static @Nullable BundleScenes instance;
 
-    public static void setInstance(BundleScenes instance) {
+    public static void setInstance(@Nullable BundleScenes instance) {
         BundleScenesProvider.instance = instance;
     }
 }
