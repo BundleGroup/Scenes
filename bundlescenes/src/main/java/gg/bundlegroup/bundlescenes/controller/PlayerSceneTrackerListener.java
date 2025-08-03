@@ -1,6 +1,7 @@
 package gg.bundlegroup.bundlescenes.controller;
 
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.jspecify.annotations.NullMarked;
@@ -13,7 +14,7 @@ public class PlayerSceneTrackerListener implements Listener {
         this.manager = manager;
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGH)
     public void onQuit(PlayerQuitEvent event) {
         manager.removePlayer(event.getPlayer());
     }

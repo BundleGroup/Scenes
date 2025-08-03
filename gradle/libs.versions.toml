@@ -1,6 +1,6 @@
 [versions]
 cloud-minecraft = "2.0.0-beta.11"
-paper = "1.21.7-R0.1-SNAPSHOT"
+paper = "1.21.8-R0.1-SNAPSHOT"
 shadow = "9.0.0-rc1"
 worldguard = "7.0.14"
 

@@ -15,9 +15,34 @@ import java.util.Set;
 public class PlayerSceneTracker {
     private final Player player;
     private final Map<ViewableScene, Set<PluginController>> visibleScenes = new HashMap<>();
+    private boolean hideAll;
 
     public PlayerSceneTracker(Player player) {
         this.player = player;
+    }
+
+    public boolean isHideAll() {
+        return hideAll;
+    }
+
+    public void setHideAll(boolean hideAll) {
+        if (this.hideAll == hideAll) {
+            return;
+        }
+        this.hideAll = hideAll;
+        if (hideAll) {
+            for (ViewableScene scene : visibleScenes.keySet()) {
+                scene.removeViewer(player);
+            }
+        } else {
+            for (ViewableScene scene : visibleScenes.keySet()) {
+                scene.addViewer(player);
+            }
+        }
+    }
+
+    public Set<ViewableScene> getVisibleScenes() {
+        return Collections.unmodifiableSet(visibleScenes.keySet());
     }
 
     public Set<PluginController> getControllersShowingScene(Scene scene) {
@@ -32,7 +57,9 @@ public class PlayerSceneTracker {
 
     public void showScene(PluginController controller, ViewableScene scene) {
         visibleScenes.computeIfAbsent(scene, s -> {
-            s.addViewer(player);
+            if (!hideAll) {
+                s.addViewer(player);
+            }
             return new HashSet<>();
         }).add(controller);
     }
@@ -55,7 +82,9 @@ public class PlayerSceneTracker {
             }
 
             // this was the last controller, no longer visible
-            s.removeViewer(player);
+            if (!hideAll) {
+                s.removeViewer(player);
+            }
             return null;
         });
     }

@@ -31,6 +31,7 @@ import org.incendo.cloud.paper.PaperCommandManager;
 import org.incendo.cloud.paper.util.sender.PaperSimpleSenderMapper;
 import org.incendo.cloud.paper.util.sender.PlayerSource;
 import org.incendo.cloud.paper.util.sender.Source;
+import org.incendo.cloud.parser.standard.BooleanParser;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
@@ -128,6 +129,21 @@ public class Main extends JavaPlugin {
                     player.sendMessage(text("No longer manually showing scene ", MessageStyle.SUCCESS)
                             .append(text(scene.key().asMinimalString(), MessageStyle.SUCCESS_ACCENT))
                             .append(text(".")));
+                }));
+        commandManager.command(manualRoot.literal("hideall")
+                .senderType(PlayerSource.class)
+                .required("value", BooleanParser.booleanParser())
+                .handler(context -> {
+                    Objects.requireNonNull(scenes);
+                    Player player = context.sender().source();
+                    PlayerSceneTracker tracker = scenes.getPlayerSceneTrackerManager().getOrCreatePlayer(player);
+                    boolean value = context.get("value");
+                    tracker.setHideAll(value);
+                    if (value) {
+                        player.sendMessage(text("Forcefully hiding all scenes from you.", MessageStyle.SUCCESS));
+                    } else {
+                        player.sendMessage(text("No longer hiding all scenes from you.", MessageStyle.SUCCESS));
+                    }
                 }));
         commandManager.command(root.literal("status")
                 .permission("bundlescenes.status")
