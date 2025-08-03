@@ -8,6 +8,7 @@ import net.kyori.adventure.key.Key;
 import org.bukkit.NamespacedKey;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
 import org.bukkit.persistence.PersistentDataContainer;
@@ -67,6 +68,10 @@ public class EntitySupport {
                     String sceneName = scene.key().asMinimalString();
                     int count = 0;
                     for (Entity entity : selector.values()) {
+                        if (entity instanceof Player) {
+                            continue;
+                        }
+
                         PersistentDataContainer pdc = entity.getPersistentDataContainer();
                         String previousSceneName = pdc.get(SCENE_KEY, PersistentDataType.STRING);
                         if (Objects.equals(sceneName, previousSceneName)) {
@@ -110,6 +115,11 @@ public class EntitySupport {
     public void loadEntity(Entity entity) {
         Scene scene = getScene(entity);
         if (scene == null) {
+            return;
+        }
+
+        if (entity instanceof Player) {
+            entity.getPersistentDataContainer().remove(SCENE_KEY);
             return;
         }
 

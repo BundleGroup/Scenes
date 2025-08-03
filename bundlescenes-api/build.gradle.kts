@@ -9,8 +9,8 @@ dependencies {
 
 publishing {
     repositories {
-        maven("https://repo.theatlas.gg/repository/maven-snapshots/") {
-            name = "atlas"
+        maven("https://repo.bundlegroup.gg/repository/maven-snapshots/") {
+            name = "bundlegroup"
             credentials(PasswordCredentials::class)
         }
     }

@@ -3,10 +3,8 @@ plugins {
 }
 
 repositories {
-    mavenCentral()
-    maven("https://repo.papermc.io/repository/maven-public/")
-    maven("https://repo.theatlas.gg/repository/maven-public/") {
-        name = "atlas"
+    maven("https://repo.bundlegroup.gg/repository/maven-public/") {
+        name = "bundlegroup"
         credentials(PasswordCredentials::class)
     }
     maven("https://maven.enginehub.org/repo/")
