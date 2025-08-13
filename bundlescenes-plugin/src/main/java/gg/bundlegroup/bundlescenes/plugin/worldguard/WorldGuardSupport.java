@@ -1,4 +1,4 @@
-package gg.bundlegroup.bundlescenes.worldguard;
+package gg.bundlegroup.bundlescenes.plugin.worldguard;
 
 import com.sk89q.worldguard.WorldGuard;
 import com.sk89q.worldguard.protection.flags.SetFlag;

@@ -4,6 +4,9 @@ version: "${version}"
 api-version: "1.21.8"
 dependencies:
   server:
+    WorldEdit:
+      load: BEFORE
+      required: false
     WorldGuard:
       load: BEFORE
       required: false

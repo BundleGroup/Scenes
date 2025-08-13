@@ -1,4 +1,4 @@
-package gg.bundlegroup.bundlescenes.worldguard;
+package gg.bundlegroup.bundlescenes.plugin.worldguard;
 
 import com.google.common.collect.Sets;
 import com.sk89q.worldedit.bukkit.BukkitAdapter;

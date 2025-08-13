@@ -6,8 +6,8 @@ plugins {
 dependencies {
     compileOnly(libs.paper.api)
     implementation(project(":bundlescenes"))
-    implementation(project(":bundlescenes-worldguard"))
     implementation(project(":bundlescenes-entity"))
+    compileOnly(libs.worldguard.bukkit)
 }
 
 tasks {

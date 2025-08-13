@@ -13,7 +13,7 @@ import gg.bundlegroup.bundlescenes.controller.PlayerSceneTracker;
 import gg.bundlegroup.bundlescenes.controller.PlayerSceneTrackerListener;
 import gg.bundlegroup.bundlescenes.controller.PluginController;
 import gg.bundlegroup.bundlescenes.entity.EntitySupport;
-import gg.bundlegroup.bundlescenes.worldguard.WorldGuardSupport;
+import gg.bundlegroup.bundlescenes.plugin.worldguard.WorldGuardSupport;
 import io.leangen.geantyref.TypeToken;
 import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
 import net.kyori.adventure.key.Key;
