@@ -17,6 +17,7 @@ import gg.bundlegroup.bundlescenes.api.scene.Scene;
 import net.kyori.adventure.key.Key;
 import org.bukkit.entity.Player;
 import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Set;
 
@@ -33,15 +34,20 @@ public class SceneRegionHandler extends FlagValueChangeHandler<Set<String>> {
     }
 
     @Override
-    protected void onInitialValue(LocalPlayer player, ApplicableRegionSet set, Set<String> value) {
+    protected void onInitialValue(LocalPlayer player, ApplicableRegionSet set, @Nullable Set<String> value) {
         Player bukkitPlayer = BukkitAdapter.adapt(player);
-        for (String name : value) {
-            controller.showScene(bukkitPlayer, getScene(name));
+        if (value != null) {
+            for (String name : value) {
+                controller.showScene(bukkitPlayer, getScene(name));
+            }
         }
     }
 
     @Override
-    protected boolean onSetValue(LocalPlayer player, Location from, Location to, ApplicableRegionSet toSet, Set<String> currentValue, Set<String> lastValue, MoveType moveType) {
+    protected boolean onSetValue(LocalPlayer player, Location from, Location to, ApplicableRegionSet toSet, Set<String> currentValue, @Nullable Set<String> lastValue, MoveType moveType) {
+        if (lastValue == null) {
+            return true;
+        }
         Player bukkitPlayer = BukkitAdapter.adapt(player);
         for (String name : Sets.difference(lastValue, currentValue)) {
             controller.hideScene(bukkitPlayer, getScene(name));

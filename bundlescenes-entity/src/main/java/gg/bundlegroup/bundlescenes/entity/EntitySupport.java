@@ -102,7 +102,6 @@ public class EntitySupport {
                     }));
             commandManager.command(unsetNode
                     .literal("worldedit")
-                    .required(sceneKey, SceneParser.sceneParser())
                     .senderType(PlayerSource.class)
                     .handler(context -> {
                         Set<Entity> entities = getSelectedEntities(context.sender().source());

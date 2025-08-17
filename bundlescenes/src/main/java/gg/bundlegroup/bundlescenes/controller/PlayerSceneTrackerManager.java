@@ -12,9 +12,6 @@ public class PlayerSceneTrackerManager {
     private final Map<Player, PlayerSceneTracker> playerTrackers = new HashMap<>();
 
     public PlayerSceneTracker getOrCreatePlayer(Player player) {
-        if (!player.isOnline()) {
-            throw new IllegalArgumentException("Player is offline");
-        }
         return playerTrackers.computeIfAbsent(player, PlayerSceneTracker::new);
     }
 
