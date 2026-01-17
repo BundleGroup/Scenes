@@ -1,35 +1,40 @@
 package gg.bundlegroup.bundlescenes.api;
 
-import gg.bundlegroup.bundlescenes.api.controller.Controller;
-import gg.bundlegroup.bundlescenes.api.scene.ChunkSceneProvider;
-import gg.bundlegroup.bundlescenes.api.scene.Scene;
-import net.kyori.adventure.key.Key;
-import org.bukkit.Chunk;
-import org.bukkit.Location;
-import org.bukkit.World;
+import org.bukkit.entity.Entity;
 import org.bukkit.plugin.Plugin;
-import org.jspecify.annotations.NullMarked;
 
-import java.util.Collection;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
-@NullMarked
 public interface BundleScenes {
-    Controller createController(Plugin plugin, Key key);
+    Controller createController(Plugin plugin);
 
-    Scene scene(Key key);
+    Element createElement(Plugin plugin, Viewable viewable);
 
-    Collection<Scene> scenes();
+    Set<String> getTags();
 
-    default ChunkSceneProvider chunk(Location location) {
-        return chunk(location.getChunk());
+    Set<String> getEntityTags(Entity entity);
+
+    void setEntityTags(Entity entity, Set<String> tags);
+
+    default boolean addEntityTag(Entity entity, String tag) {
+        Set<String> tags = new HashSet<>(getEntityTags(entity));
+        boolean added = tags.add(tag);
+        if (added) {
+            setEntityTags(entity, tags);
+        }
+        return added;
     }
 
-    default ChunkSceneProvider chunk(Chunk chunk) {
-        return chunk(chunk.getWorld(), chunk.getX(), chunk.getZ());
+    default boolean removeEntityTag(Entity entity, String tag) {
+        Set<String> tags = new HashSet<>(getEntityTags(entity));
+        boolean removed = tags.remove(tag);
+        if (removed) {
+            setEntityTags(entity, tags);
+        }
+        return removed;
     }
-
-    ChunkSceneProvider chunk(World world, int x, int z);
 
     static BundleScenes get() {
         return Objects.requireNonNull(BundleScenesProvider.instance);

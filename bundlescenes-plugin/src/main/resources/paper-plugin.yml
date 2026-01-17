@@ -1,7 +1,8 @@
 name: "BundleScenes"
 main: "gg.bundlegroup.bundlescenes.plugin.Main"
+bootstrapper: "gg.bundlegroup.bundlescenes.plugin.Bootstrap"
 version: "${version}"
-api-version: "1.21.8"
+api-version: "1.21.11"
 dependencies:
   server:
     WorldEdit:

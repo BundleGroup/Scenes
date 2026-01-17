@@ -4,5 +4,6 @@ plugins {
 
 dependencies {
     compileOnly(libs.paper.api)
-    api(project(":bundlescenes-api"))
+    compileOnly(project(":bundlescenes"))
+    compileOnly(libs.worldguard.bukkit)
 }

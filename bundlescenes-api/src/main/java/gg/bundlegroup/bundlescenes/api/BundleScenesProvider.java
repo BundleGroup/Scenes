@@ -1,9 +1,9 @@
 package gg.bundlegroup.bundlescenes.api;
 
-import org.jspecify.annotations.NullMarked;
+import org.jetbrains.annotations.ApiStatus;
 import org.jspecify.annotations.Nullable;
 
-@NullMarked
+@ApiStatus.Internal
 public final class BundleScenesProvider {
     public BundleScenesProvider() {
     }
