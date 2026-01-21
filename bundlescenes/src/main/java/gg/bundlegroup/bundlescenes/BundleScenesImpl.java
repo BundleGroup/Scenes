@@ -226,6 +226,9 @@ public class BundleScenesImpl implements BundleScenes, Closeable {
 
     public void removePlugin(Plugin plugin) {
         PluginState pluginState = plugins.remove(plugin);
+        if (pluginState == null) {
+            return;
+        }
         for (PluginElement element : pluginState.elements) {
             element.remove();
         }

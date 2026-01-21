@@ -4,6 +4,8 @@ import gg.bundlegroup.bundlescenes.api.Controller;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
+import java.util.Set;
+
 public class PluginController implements Controller {
     private final BundleScenesImpl scenes;
     private final Plugin plugin;
@@ -47,6 +49,11 @@ public class PluginController implements Controller {
     @Override
     public boolean isShowingTag(Player player, String tag) {
         return showingTags.contains(player, tag);
+    }
+
+    @Override
+    public Set<String> getShownTags(Player player) {
+        return Set.copyOf(showingTags.get(player));
     }
 
     @Override

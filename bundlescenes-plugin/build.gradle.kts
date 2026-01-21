@@ -6,6 +6,7 @@ plugins {
 dependencies {
     compileOnly(libs.paper.api)
     implementation(project(":bundlescenes"))
+    implementation(project(":bundlescenes-traincarts"))
     implementation(project(":bundlescenes-worldedit"))
     implementation(project(":bundlescenes-worldguard"))
 }

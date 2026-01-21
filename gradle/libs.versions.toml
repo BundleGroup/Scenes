@@ -1,11 +1,13 @@
 [versions]
 paper = "1.21.11-R0.1-SNAPSHOT"
 shadow = "9.3.1"
+traincarts = "1.21.11-v2"
 worldedit = "7.3.18"
 worldguard = "7.0.15"
 
 [libraries]
 paper-api = { module = "io.papermc.paper:paper-api", version.ref = "paper" }
+traincarts = { module = "com.bergerkiller.bukkit:TrainCarts", version.ref = "traincarts" }
 worldedit-bukkit = { module = "com.sk89q.worldedit:worldedit-bukkit", version.ref = "worldedit" }
 worldguard-bukkit = { module = "com.sk89q.worldguard:worldguard-bukkit", version.ref = "worldguard" }
 

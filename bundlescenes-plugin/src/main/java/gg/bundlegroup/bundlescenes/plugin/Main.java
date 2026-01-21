@@ -6,6 +6,7 @@ import gg.bundlegroup.bundlescenes.BundleScenesListener;
 import gg.bundlegroup.bundlescenes.api.BundleScenesProvider;
 import gg.bundlegroup.bundlescenes.api.Controller;
 import gg.bundlegroup.bundlescenes.entity.EntityListener;
+import gg.bundlegroup.bundlescenes.traincarts.TrainCartsAddon;
 import gg.bundlegroup.bundlescenes.worldedit.WorldEditAddon;
 import gg.bundlegroup.bundlescenes.worldguard.worldguard.WorldGuardAddon;
 import org.bukkit.Bukkit;
@@ -26,6 +27,9 @@ public class Main extends JavaPlugin {
     public void onLoad() {
         scenes = new BundleScenesImpl(this);
         BundleScenesProvider.setInstance(scenes);
+        if (Bukkit.getPluginManager().getPlugin("Train_Carts") != null) {
+            addons.add(new TrainCartsAddon(this, scenes));
+        }
         if (Bukkit.getPluginManager().getPlugin("WorldEdit") != null) {
             addons.add(new WorldEditAddon(this, scenes));
         }

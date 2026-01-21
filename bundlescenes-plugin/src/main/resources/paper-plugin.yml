@@ -5,9 +5,19 @@ version: "${version}"
 api-version: "1.21.11"
 dependencies:
   server:
+    Train_Carts:
+      load: BEFORE
+      required: false
     WorldEdit:
       load: BEFORE
       required: false
     WorldGuard:
       load: BEFORE
       required: false
+permissions:
+  bundlescenes.manual:
+    default: op
+  bundlescenes.assign.entity:
+    default: op
+  bundlescenes.traincarts.build:
+    default: op
