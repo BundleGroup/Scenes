@@ -23,5 +23,5 @@ jobs:
         run: ./gradlew publish
         if: github.ref == 'refs/heads/main'
     env:
-      ORG_GRADLE_PROJECT_atlasUsername: ${{ secrets.ATLAS_USERNAME }}
-      ORG_GRADLE_PROJECT_atlasPassword: ${{ secrets.ATLAS_PASSWORD }}
+      ORG_GRADLE_PROJECT_bundlegroupUsername: ${{ secrets.BUNDLEGROUP_USERNAME }}
+      ORG_GRADLE_PROJECT_bundlegroupPassword: ${{ secrets.BUNDLEGROUP_PASSWORD }}
