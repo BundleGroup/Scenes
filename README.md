@@ -82,7 +82,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly("gg.bundlegroup.scenes:scenes-api:1.0.0-SNAPSHOT")
+    compileOnly("gg.bundlegroup.scenes:scenes-api:1.0.0")
 }
 ```
 
