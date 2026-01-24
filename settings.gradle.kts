@@ -1,12 +1,12 @@
-rootProject.name = "BundleScenes"
+rootProject.name = "Scenes"
 
 pluginManagement {
     includeBuild("build-logic")
 }
 
-include("bundlescenes")
-include("bundlescenes-api")
-include("bundlescenes-plugin")
-include("bundlescenes-traincarts")
-include("bundlescenes-worldedit")
-include("bundlescenes-worldguard")
+include("scenes")
+include("scenes-api")
+include("scenes-plugin")
+include("scenes-traincarts")
+include("scenes-worldedit")
+include("scenes-worldguard")

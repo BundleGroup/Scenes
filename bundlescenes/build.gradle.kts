@@ -1,8 +1,0 @@
-plugins {
-    id("bundlescenes.base")
-}
-
-dependencies {
-    compileOnly(libs.paper.api)
-    api(project(":bundlescenes-api"))
-}

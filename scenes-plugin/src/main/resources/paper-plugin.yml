@@ -1,0 +1,23 @@
+name: "Scenes"
+main: "gg.bundlegroup.scenes.plugin.Main"
+bootstrapper: "gg.bundlegroup.scenes.plugin.Bootstrap"
+version: "${version}"
+api-version: "1.21.11"
+dependencies:
+  server:
+    Train_Carts:
+      load: BEFORE
+      required: false
+    WorldEdit:
+      load: BEFORE
+      required: false
+    WorldGuard:
+      load: BEFORE
+      required: false
+permissions:
+  scenes.manual:
+    default: op
+  cenes.assign.entity:
+    default: op
+  scenes.traincarts.build:
+    default: op
