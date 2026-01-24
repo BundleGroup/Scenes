@@ -17,7 +17,7 @@ dependencies:
 permissions:
   scenes.manual:
     default: op
-  cenes.assign.entity:
+  scenes.assign.entity:
     default: op
   scenes.traincarts.build:
     default: op
