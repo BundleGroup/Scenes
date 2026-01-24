@@ -108,10 +108,9 @@ Element element = Scenes.get().createElement(plugin, viewable);
 element.addTag("hello_world");
 ```
 
-The passed `viewable` object needs to implement these methods:
+The passed `Viewable` object needs to implement these methods:
 
 ```java
-
 @Override
 public void addViewer(Player player) {
 }

@@ -1,4 +1,6 @@
 [versions]
+hangar-publish-plugin = "0.1.4"
+minotaur = "2.8.10"
 paper = "1.21.11-R0.1-SNAPSHOT"
 shadow = "9.3.1"
 traincarts = "1.21.11-v2"
@@ -12,4 +14,6 @@ worldedit-bukkit = { module = "com.sk89q.worldedit:worldedit-bukkit", version.re
 worldguard-bukkit = { module = "com.sk89q.worldguard:worldguard-bukkit", version.ref = "worldguard" }
 
 [plugins]
+hangar-publish = { id = "io.papermc.hangar-publish-plugin", version.ref = "hangar-publish-plugin" }
+minotaur = { id = "com.modrinth.minotaur", version.ref = "minotaur" }
 shadow = { id = "com.gradleup.shadow", version.ref = "shadow" }

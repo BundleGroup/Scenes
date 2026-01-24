@@ -9,9 +9,16 @@ dependencies {
 
 publishing {
     repositories {
-        maven("https://repo.bundlegroup.gg/repository/maven-snapshots/") {
-            name = "bundlegroup"
-            credentials(PasswordCredentials::class)
+        if (version.toString().endsWith("-SNAPSHOT")) {
+            maven("https://repo.bundlegroup.gg/repository/maven-snapshots/") {
+                name = "bundlegroup"
+                credentials(PasswordCredentials::class)
+            }
+        } else {
+            maven("https://repo.bundlegroup.gg/repository/maven-releases/") {
+                name = "bundlegroup"
+                credentials(PasswordCredentials::class)
+            }
         }
     }
 
