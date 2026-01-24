@@ -26,11 +26,18 @@ tasks {
         }
     }
 
+    jar {
+        archiveBaseName = "Scenes"
+        archiveClassifier = "dev"
+    }
+
     shadowJar {
         val prefix = "gg.bundlegroup.scenes.lib"
         relocate("io.leangen.geantyref", "$prefix.geantyref")
         relocate("org.incendo.cloud", "$prefix.cloud")
         mergeServiceFiles()
+        archiveBaseName = "Scenes"
+        archiveClassifier = ""
     }
 
     val staticJar by registering(Copy::class) {
