@@ -17,6 +17,10 @@ dependencies:
 permissions:
   scenes.use:
     default: op
+  scenes.status:
+    default: op
+    children:
+      - scenes.use
   scenes.manual:
     default: op
     children:

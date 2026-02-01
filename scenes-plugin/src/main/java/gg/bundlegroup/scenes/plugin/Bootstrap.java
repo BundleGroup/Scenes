@@ -4,6 +4,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import gg.bundlegroup.scenes.WorldEditAddon;
 import gg.bundlegroup.scenes.command.HideCommand;
 import gg.bundlegroup.scenes.command.ShowCommand;
+import gg.bundlegroup.scenes.command.StatusCommand;
 import gg.bundlegroup.scenes.command.suggestion.EntityTagSuggestionProvider;
 import gg.bundlegroup.scenes.command.suggestion.HideTagSuggestionProvider;
 import gg.bundlegroup.scenes.command.suggestion.ShowTagSuggestionProvider;
@@ -35,6 +36,9 @@ public class Bootstrap implements PluginBootstrap {
         registrar.register(Commands.literal("scenes")
                 .requires(sender -> mainHolder.hasMain()
                         && sender.getSender().hasPermission("scenes.use"))
+                .then(Commands.literal("status")
+                        .requires(sender -> sender.getSender().hasPermission("scenes.status"))
+                        .executes(new StatusCommand(mainHolder)))
                 .then(Commands.literal("show")
                         .requires(sender -> sender.getSender().hasPermission("scenes.manual"))
                         .then(Commands.argument("tag", StringArgumentType.string())

@@ -245,6 +245,18 @@ public class ScenesImpl implements Scenes, Closeable {
         }
     }
 
+    public int getTagCount() {
+        return tags.size();
+    }
+
+    public int getElementCount() {
+        return elements.size();
+    }
+
+    public int getPlayerCount() {
+        return players.size();
+    }
+
     private static class PluginState {
         private final Plugin plugin;
         private final Set<PluginController> controllers = new HashSet<>();
