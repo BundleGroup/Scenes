@@ -8,10 +8,8 @@ import com.sk89q.worldedit.bukkit.BukkitPlayer;
 import com.sk89q.worldedit.math.BlockVector2;
 import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.regions.Region;
-import gg.bundlegroup.scenes.Addon;
 import gg.bundlegroup.scenes.ScenesImpl;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
+import gg.bundlegroup.scenes.WorldEditAddon;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -23,11 +21,11 @@ import org.jspecify.annotations.Nullable;
 import java.util.HashSet;
 import java.util.Set;
 
-public class WorldEditAddon implements Addon {
+public class WorldEditAddonImpl implements WorldEditAddon {
     private final Plugin plugin;
     private final ScenesImpl scenes;
 
-    public WorldEditAddon(Plugin plugin, ScenesImpl scenes) {
+    public WorldEditAddonImpl(Plugin plugin, ScenesImpl scenes) {
         this.plugin = plugin;
         this.scenes = scenes;
     }
@@ -37,7 +35,8 @@ public class WorldEditAddon implements Addon {
 
     }
 
-    private static @Nullable Set<Entity> getSelectedEntities(Player player) {
+    @Override
+    public @Nullable Set<Entity> getSelectedEntities(Player player) {
         BukkitPlayer bukkitPlayer = BukkitAdapter.adapt(player);
         LocalSession localSession = WorldEdit.getInstance().getSessionManager().get(bukkitPlayer);
         com.sk89q.worldedit.world.World selectionWorld = localSession.getSelectionWorld();
@@ -48,7 +47,6 @@ public class WorldEditAddon implements Addon {
             }
             selection = localSession.getSelection(selectionWorld);
         } catch (IncompleteRegionException e) {
-            player.sendMessage(Component.text("No WorldEdit selection", NamedTextColor.RED));
             return null;
         }
         World world = BukkitAdapter.adapt(selectionWorld);

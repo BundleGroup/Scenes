@@ -15,9 +15,19 @@ dependencies:
       load: BEFORE
       required: false
 permissions:
+  scenes.use:
+    default: op
   scenes.manual:
     default: op
+    children:
+      - scenes.use
   scenes.assign.entity:
     default: op
+    children:
+      - scenes.use
+  scenes.assign.worldedit:
+    default: op
+    children:
+      - scenes.use
   scenes.traincarts.build:
     default: op

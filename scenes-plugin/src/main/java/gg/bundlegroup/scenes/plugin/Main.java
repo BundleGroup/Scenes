@@ -3,11 +3,11 @@ package gg.bundlegroup.scenes.plugin;
 import gg.bundlegroup.scenes.Addon;
 import gg.bundlegroup.scenes.ScenesImpl;
 import gg.bundlegroup.scenes.ScenesListener;
-import gg.bundlegroup.scenes.api.ScenesProvider;
 import gg.bundlegroup.scenes.api.Controller;
+import gg.bundlegroup.scenes.api.ScenesProvider;
 import gg.bundlegroup.scenes.entity.EntityListener;
 import gg.bundlegroup.scenes.traincarts.TrainCartsAddon;
-import gg.bundlegroup.scenes.worldedit.WorldEditAddon;
+import gg.bundlegroup.scenes.worldedit.WorldEditAddonImpl;
 import gg.bundlegroup.scenes.worldguard.worldguard.WorldGuardAddon;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.PluginManager;
@@ -31,7 +31,7 @@ public class Main extends JavaPlugin {
             addons.add(new TrainCartsAddon(this, scenes));
         }
         if (Bukkit.getPluginManager().getPlugin("WorldEdit") != null) {
-            addons.add(new WorldEditAddon(this, scenes));
+            addons.add(new WorldEditAddonImpl(this, scenes));
         }
         if (Bukkit.getPluginManager().getPlugin("WorldGuard") != null) {
             addons.add(new WorldGuardAddon(this, scenes));
@@ -99,5 +99,14 @@ public class Main extends JavaPlugin {
         for (Addon addon : addons) {
             addon.disable();
         }
+    }
+
+    public <T extends Addon> @Nullable T findAddon(Class<T> type) {
+        for (Addon addon : addons) {
+            if (type.isInstance(addon)) {
+                return type.cast(addon);
+            }
+        }
+        return null;
     }
 }

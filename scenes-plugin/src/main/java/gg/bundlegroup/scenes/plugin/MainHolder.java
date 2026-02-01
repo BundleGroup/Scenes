@@ -7,6 +7,10 @@ import java.util.Objects;
 public class MainHolder {
     private @Nullable Main main;
 
+    public boolean hasMain() {
+        return main != null;
+    }
+
     public Main getMain() {
         return Objects.requireNonNull(main, "main");
     }
