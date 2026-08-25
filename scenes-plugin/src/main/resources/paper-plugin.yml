@@ -2,7 +2,7 @@ name: "Scenes"
 main: "gg.bundlegroup.scenes.plugin.Main"
 bootstrapper: "gg.bundlegroup.scenes.plugin.Bootstrap"
 version: "${version}"
-api-version: "1.21.11"
+api-version: "26.2"
 dependencies:
   server:
     Train_Carts:

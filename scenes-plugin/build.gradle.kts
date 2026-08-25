@@ -7,10 +7,11 @@ plugins {
     alias(libs.plugins.minotaur)
 }
 
-val supportedGameVersions = listOf("1.21.11")
+val supportedGameVersions = listOf("26.2")
 
 dependencies {
     compileOnly(libs.paper.api)
+    compileOnly(libs.worldguard.bukkit)
     implementation(project(":scenes"))
     implementation(project(":scenes-traincarts"))
     implementation(project(":scenes-worldedit"))
