@@ -7,7 +7,7 @@ plugins {
     alias(libs.plugins.minotaur)
 }
 
-val supportedGameVersions = listOf("1.21.11")
+val supportedGameVersions = listOf("26.3")
 
 dependencies {
     compileOnly(libs.paper.api)

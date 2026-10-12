@@ -5,3 +5,5 @@
 * Add status command
     * Allows viewing the number of tracked entities, players and tags
     * `/scenes status`
+---
+* Updated to 26.3

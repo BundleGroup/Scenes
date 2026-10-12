@@ -5,5 +5,5 @@ plugins {
 dependencies {
     compileOnly(libs.paper.api)
     compileOnly(project(":scenes"))
-    compileOnly(libs.worldguard.bukkit)
+    compileOnlyApi(libs.worldguard.bukkit)
 }

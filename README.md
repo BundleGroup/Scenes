@@ -7,7 +7,7 @@ This happens even if the entities are not visible, for example, if they are behi
 
 ## Installation
 
-This plugin requires **Paper 1.21.11**.
+This plugin requires **Paper 26.3**.
 
 Download and place the `Scenes.jar` file in your `plugins` folder.
 
