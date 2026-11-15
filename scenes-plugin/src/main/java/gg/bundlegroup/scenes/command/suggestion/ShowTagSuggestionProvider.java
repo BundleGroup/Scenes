@@ -31,6 +31,9 @@ public class ShowTagSuggestionProvider implements SuggestionProvider<CommandSour
                 builder.suggest(tag);
             }
         }
+        for (String tag : main.getScenes().getForceHiddenTags(player)) {
+            builder.suggest(tag);
+        }
         return builder.buildFuture();
     }
 }

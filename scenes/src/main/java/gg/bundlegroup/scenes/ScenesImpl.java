@@ -28,6 +28,7 @@ public class ScenesImpl implements Scenes, Closeable {
     private final Map<String, TagState> tags = new HashMap<>();
     private final Map<PluginElement, ElementState> elements = new HashMap<>();
     private final Map<Player, PlayerState> players = new HashMap<>();
+    private final MultiMap<Player, String> forceHidden = new MultiMap<>();
     private final EntityManager entityManager;
 
     public ScenesImpl(Plugin plugin) {
@@ -137,6 +138,9 @@ public class ScenesImpl implements Scenes, Closeable {
         if (elementState.tags.add(tagState)) {
             tagState.elements.add(elementState);
             for (PlayerState playerState : tagState.viewers.keySet()) {
+                if (isForceHidden(playerState.player, tagState.tag)) {
+                    continue;
+                }
                 elementState.viewers.addAndCheckFirst(playerState, tagState);
             }
         }
@@ -151,6 +155,9 @@ public class ScenesImpl implements Scenes, Closeable {
         if (elementState.tags.remove(tagState)) {
             tagState.elements.remove(elementState);
             for (PlayerState playerState : tagState.viewers.keySet()) {
+                if (isForceHidden(playerState.player, tagState.tag)) {
+                    continue;
+                }
                 elementState.viewers.removeAndCheckLast(playerState, tagState);
             }
         }
@@ -167,10 +174,8 @@ public class ScenesImpl implements Scenes, Closeable {
         TagState tagState = tags.computeIfAbsent(tag, TagState::new);
         if (tagState.viewers.addAndCheckFirst(playerState, controller)) {
             playerState.tags.add(tagState);
-            for (ElementState elementState : tagState.elements) {
-                if (elementState.viewers.addAndCheckFirst(playerState, tagState)) {
-                    elementState.element.getViewable().addViewer(player);
-                }
+            if (!isForceHidden(player, tag)) {
+                showElements(playerState, tagState);
             }
         }
     }
@@ -183,10 +188,8 @@ public class ScenesImpl implements Scenes, Closeable {
         }
         if (tagState.viewers.removeAndCheckLast(playerState, controller)) {
             playerState.tags.remove(tagState);
-            for (ElementState elementState : tagState.elements) {
-                if (elementState.viewers.removeAndCheckLast(playerState, tagState)) {
-                    elementState.element.getViewable().removeViewer(player);
-                }
+            if (!isForceHidden(player, tag)) {
+                hideElements(playerState, tagState);
             }
         }
         if (playerState.isEmpty()) {
@@ -197,9 +200,85 @@ public class ScenesImpl implements Scenes, Closeable {
         }
     }
 
-    public void removePlayer(Player player) {
+    private void showElements(PlayerState playerState, TagState tagState) {
+        for (ElementState elementState : tagState.elements) {
+            if (elementState.viewers.addAndCheckFirst(playerState, tagState)) {
+                elementState.element.getViewable().addViewer(playerState.player);
+            }
+        }
+    }
+
+    private void hideElements(PlayerState playerState, TagState tagState) {
+        for (ElementState elementState : tagState.elements) {
+            if (elementState.viewers.removeAndCheckLast(playerState, tagState)) {
+                elementState.element.getViewable().removeViewer(playerState.player);
+            }
+        }
+    }
+
+    /**
+     * Returns the tags that at least one controller is currently showing to the player,
+     * including tags that are force-hidden.
+     */
+    public Set<String> getPlayerTags(Player player) {
         PlayerState playerState = players.get(player);
         if (playerState == null) {
+            return Set.of();
+        }
+        Set<String> result = new HashSet<>();
+        for (TagState tagState : playerState.tags) {
+            result.add(tagState.tag);
+        }
+        return result;
+    }
+
+    public boolean isForceHidden(Player player, String tag) {
+        return forceHidden.contains(player, tag);
+    }
+
+    public Set<String> getForceHiddenTags(Player player) {
+        return Set.copyOf(forceHidden.get(player));
+    }
+
+    /**
+     * Hides the tag from the player even if a controller (such as a WorldGuard region) is showing it.
+     *
+     * @return false if the tag was already force-hidden
+     */
+    public boolean forceHideTag(Player player, String tag) {
+        if (!forceHidden.add(player, tag)) {
+            return false;
+        }
+        PlayerState playerState = players.get(player);
+        TagState tagState = tags.get(tag);
+        if (playerState != null && tagState != null && playerState.tags.contains(tagState)) {
+            hideElements(playerState, tagState);
+        }
+        return true;
+    }
+
+    /**
+     * Lifts a force-hide, so the tag is visible again if any controller is showing it.
+     *
+     * @return false if the tag was not force-hidden
+     */
+    public boolean unforceHideTag(Player player, String tag) {
+        if (!forceHidden.remove(player, tag)) {
+            return false;
+        }
+        PlayerState playerState = players.get(player);
+        TagState tagState = tags.get(tag);
+        if (playerState != null && tagState != null && playerState.tags.contains(tagState)) {
+            showElements(playerState, tagState);
+        }
+        return true;
+    }
+
+    public void removePlayer(Player player) {
+        Set<String> playerForceHidden = forceHidden.get(player);
+        PlayerState playerState = players.get(player);
+        if (playerState == null) {
+            forceHidden.removeAll(player);
             return;
         }
         for (TagState tagState : playerState.tags) {
@@ -207,16 +286,15 @@ public class ScenesImpl implements Scenes, Closeable {
                 controller.removePlayer(player);
             }
             tagState.viewers.removeAll(playerState);
-            for (ElementState elementState : tagState.elements) {
-                if (elementState.viewers.removeAndCheckLast(playerState, tagState)) {
-                    elementState.element.getViewable().removeViewer(player);
-                }
+            if (!playerForceHidden.contains(tagState.tag)) {
+                hideElements(playerState, tagState);
             }
             if (tagState.isEmpty()) {
                 tags.remove(tagState.tag);
             }
         }
         players.remove(player);
+        forceHidden.removeAll(player);
     }
 
     @Override

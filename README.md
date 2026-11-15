@@ -26,6 +26,14 @@ Then, tags can be shown or hidden. This shows or hides all entities assigned to 
 /scenes show hello_world
 ```
 
+To hide a tag even while a region, train or other integration is showing it, add `-f` (force):
+
+```
+/scenes hide hello_world -f
+```
+
+The tag stays hidden for you until you run `/scenes show hello_world`, or until you log out.
+
 Instead of using a command, you can control tag visibility using the following integrations.
 
 ### WorldGuard regions
@@ -67,7 +75,7 @@ More than two scene names can be specified by placing another sign below (just l
 | Permission                | Description                                                                 |
 |---------------------------|-----------------------------------------------------------------------------|
 | `scenes.assign.entity`    | Allows assigning entities to scene tags using `/scenes entity ... tag ...`. |
-| `scenes.manual`           | Allows using `/scenes show` and `/scenes hide` to manually show scene tags. |
+| `scenes.manual`           | Allows using `/scenes show` and `/scenes hide [-f]` to manually show or force-hide tags. |
 | `scenes.traincarts.build` | Allows placing Scenes TrainCarts signs.                                     |
 
 ## API

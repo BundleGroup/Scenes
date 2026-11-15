@@ -26,6 +26,11 @@ public class ShowCommand implements Command<CommandSourceStack> {
         String tag = context.getArgument("tag", String.class);
         Main main = mainHolder.getMain();
         Controller manualController = main.getManualController();
+        if (main.getScenes().unforceHideTag(player, tag)) {
+            context.getSource().getSender().sendMessage(text("No longer force-hiding tag ", MessageStyle.SUCCESS)
+                    .append(text(tag, MessageStyle.SUCCESS_ACCENT)));
+            return SINGLE_SUCCESS;
+        }
         if (manualController.isShowingTag(player, tag)) {
             context.getSource().getSender().sendMessage(text("Already manually showing tag ", MessageStyle.ERROR)
                     .append(text(tag, MessageStyle.ERROR_ACCENT)));
