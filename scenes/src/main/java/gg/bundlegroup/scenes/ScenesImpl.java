@@ -14,6 +14,7 @@ import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
 
 import java.io.Closeable;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -29,6 +30,7 @@ public class ScenesImpl implements Scenes, Closeable {
     private final Map<PluginElement, ElementState> elements = new HashMap<>();
     private final Map<Player, PlayerState> players = new HashMap<>();
     private final MultiMap<Player, String> forceHidden = new MultiMap<>();
+    private final Set<Player> forceHiddenAll = new HashSet<>();
     private final EntityManager entityManager;
 
     public ScenesImpl(Plugin plugin) {
@@ -233,9 +235,16 @@ public class ScenesImpl implements Scenes, Closeable {
     }
 
     public boolean isForceHidden(Player player, String tag) {
-        return forceHidden.contains(player, tag);
+        return forceHiddenAll.contains(player) || forceHidden.contains(player, tag);
     }
 
+    public boolean isForceHidingAll(Player player) {
+        return forceHiddenAll.contains(player);
+    }
+
+    /**
+     * Returns the tags individually force-hidden for the player (does not include the hide-all switch).
+     */
     public Set<String> getForceHiddenTags(Player player) {
         return Set.copyOf(forceHidden.get(player));
     }
@@ -243,42 +252,102 @@ public class ScenesImpl implements Scenes, Closeable {
     /**
      * Hides the tag from the player even if a controller (such as a WorldGuard region) is showing it.
      *
-     * @return false if the tag was already force-hidden
+     * @return false if the tag was already force-hidden individually
      */
     public boolean forceHideTag(Player player, String tag) {
+        boolean wasHidden = isForceHidden(player, tag);
         if (!forceHidden.add(player, tag)) {
             return false;
         }
+        if (!wasHidden) {
+            hideIfShownByController(player, tag);
+        }
+        return true;
+    }
+
+    /**
+     * Lifts an individual force-hide. The tag stays hidden if the hide-all switch is on.
+     *
+     * @return false if the tag was not individually force-hidden
+     */
+    public boolean unforceHideTag(Player player, String tag) {
+        if (!forceHidden.remove(player, tag)) {
+            return false;
+        }
+        if (!isForceHidden(player, tag)) {
+            showIfShownByController(player, tag);
+        }
+        return true;
+    }
+
+    /**
+     * Force-hides every tag from the player, including tags created later.
+     *
+     * @return false if already hiding all
+     */
+    public boolean forceHideAll(Player player) {
         PlayerState playerState = players.get(player);
-        TagState tagState = tags.get(tag);
-        if (playerState != null && tagState != null && playerState.tags.contains(tagState)) {
+        List<TagState> toHide = new ArrayList<>();
+        if (playerState != null) {
+            for (TagState tagState : playerState.tags) {
+                if (!isForceHidden(player, tagState.tag)) {
+                    toHide.add(tagState);
+                }
+            }
+        }
+        if (!forceHiddenAll.add(player)) {
+            return false;
+        }
+        for (TagState tagState : toHide) {
             hideElements(playerState, tagState);
         }
         return true;
     }
 
     /**
-     * Lifts a force-hide, so the tag is visible again if any controller is showing it.
+     * Lifts every force-hide for the player: the hide-all switch and all individual force-hides.
      *
-     * @return false if the tag was not force-hidden
+     * @return false if nothing was force-hidden
      */
-    public boolean unforceHideTag(Player player, String tag) {
-        if (!forceHidden.remove(player, tag)) {
-            return false;
+    public boolean clearForceHides(Player player) {
+        PlayerState playerState = players.get(player);
+        List<TagState> toShow = new ArrayList<>();
+        if (playerState != null) {
+            for (TagState tagState : playerState.tags) {
+                if (isForceHidden(player, tagState.tag)) {
+                    toShow.add(tagState);
+                }
+            }
         }
+        boolean changed = forceHiddenAll.remove(player);
+        changed |= forceHidden.removeAll(player);
+        for (TagState tagState : toShow) {
+            showElements(playerState, tagState);
+        }
+        return changed;
+    }
+
+    private void hideIfShownByController(Player player, String tag) {
+        PlayerState playerState = players.get(player);
+        TagState tagState = tags.get(tag);
+        if (playerState != null && tagState != null && playerState.tags.contains(tagState)) {
+            hideElements(playerState, tagState);
+        }
+    }
+
+    private void showIfShownByController(Player player, String tag) {
         PlayerState playerState = players.get(player);
         TagState tagState = tags.get(tag);
         if (playerState != null && tagState != null && playerState.tags.contains(tagState)) {
             showElements(playerState, tagState);
         }
-        return true;
     }
 
     public void removePlayer(Player player) {
-        Set<String> playerForceHidden = forceHidden.get(player);
         PlayerState playerState = players.get(player);
         if (playerState == null) {
             forceHidden.removeAll(player);
+            forceHiddenAll.remove(player);
             return;
         }
         for (TagState tagState : playerState.tags) {
@@ -286,7 +355,7 @@ public class ScenesImpl implements Scenes, Closeable {
                 controller.removePlayer(player);
             }
             tagState.viewers.removeAll(playerState);
-            if (!playerForceHidden.contains(tagState.tag)) {
+            if (!isForceHidden(player, tagState.tag)) {
                 hideElements(playerState, tagState);
             }
             if (tagState.isEmpty()) {
@@ -295,6 +364,7 @@ public class ScenesImpl implements Scenes, Closeable {
         }
         players.remove(player);
         forceHidden.removeAll(player);
+        forceHiddenAll.remove(player);
     }
 
     @Override
